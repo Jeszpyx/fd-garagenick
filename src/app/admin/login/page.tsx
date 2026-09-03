@@ -5,43 +5,30 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { setAdminToken } from "@/lib/api/admin-client";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default function AdminLoginPage() {
   const router = useRouter();
-  const [login, setLogin] = useState("admin");
-  const [password, setPassword] = useState("admin123");
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    const token = localStorage.getItem("admin_token");
-    if (token) {
-      router.replace("/admin/products");
-    }
-  }, [router]);
-
-  async function handleSubmit(event: React.FormEvent) {
-    event.preventDefault();
+  async function enterAdmin() {
     setLoading(true);
 
     try {
       const response = await fetch("/api/admin/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ login, password }),
+        body: JSON.stringify({}),
       });
       const json = await response.json();
 
       if (!response.ok || !json.data?.token) {
-        toast.error(json.error ?? "Неверные данные");
+        toast.error(json.error ?? "Не удалось войти");
         return;
       }
 
       setAdminToken(json.data.token);
-      toast.success("Добро пожаловать в админ-панель");
-      router.push("/admin/products");
+      router.replace("/admin/products");
     } catch {
       toast.error("Ошибка входа");
     } finally {
@@ -49,37 +36,30 @@ export default function AdminLoginPage() {
     }
   }
 
+  useEffect(() => {
+    const token = localStorage.getItem("admin_token");
+    if (token) {
+      router.replace("/admin/products");
+      return;
+    }
+
+    void enterAdmin();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [router]);
+
   return (
     <div className="flex min-h-dvh items-center justify-center px-4 py-8">
       <Card className="w-full max-w-md">
         <CardHeader>
-          <CardTitle>Вход в админ-панель</CardTitle>
+          <CardTitle>Админ-панель</CardTitle>
         </CardHeader>
-        <CardContent>
-          <form className="space-y-4" onSubmit={handleSubmit}>
-            <div className="space-y-2">
-              <Label htmlFor="login">Логин</Label>
-              <Input
-                id="login"
-                type="text"
-                autoComplete="username"
-                value={login}
-                onChange={(event) => setLogin(event.target.value)}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="password">Пароль</Label>
-              <Input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(event) => setPassword(event.target.value)}
-              />
-            </div>
-            <Button className="w-full" disabled={loading}>
-              {loading ? "Вход..." : "Войти"}
-            </Button>
-          </form>
+        <CardContent className="space-y-4">
+          <p className="text-sm text-muted-foreground">
+            Пароль сейчас не требуется.
+          </p>
+          <Button className="w-full" disabled={loading} onClick={enterAdmin}>
+            {loading ? "Вход..." : "Войти"}
+          </Button>
         </CardContent>
       </Card>
     </div>

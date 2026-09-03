@@ -17,8 +17,8 @@ export const verifyOtpSchema = z.object({
 });
 
 export const adminLoginSchema = z.object({
-  login: z.string().trim().min(3, "Введите логин").max(40),
-  password: z.string().min(6, "Пароль должен быть не короче 6 символов"),
+  login: z.string().trim().min(1).max(40).optional(),
+  password: z.string().optional(),
 });
 
 export const productSchema = z.object({
