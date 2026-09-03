@@ -18,17 +18,18 @@ export function BottomNav() {
   const totalItems = useCartStore((state) => state.totalItems());
 
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-border/60 bg-background/85 backdrop-blur-xl md:hidden">
-      <div className="mx-auto grid max-w-lg grid-cols-4 px-2 py-2">
+    <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-border/60 bg-background/90 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl md:hidden">
+      <div className="mx-auto grid max-w-lg grid-cols-4 px-2 py-1.5">
         {links.map(({ href, label, icon: Icon }) => {
-          const active = pathname === href;
+          const active =
+            href === "/" ? pathname === "/" : pathname.startsWith(href);
 
           return (
             <Link
               key={href}
               href={href}
               className={cn(
-                "relative flex flex-col items-center gap-1 rounded-xl px-2 py-2 text-xs transition",
+                "relative flex min-h-12 flex-col items-center justify-center gap-0.5 rounded-xl px-1 py-1.5 text-[11px] transition",
                 active
                   ? "bg-primary/10 text-primary"
                   : "text-muted-foreground hover:text-foreground",
@@ -37,7 +38,7 @@ export function BottomNav() {
               <Icon className="h-5 w-5" />
               {label}
               {href === "/cart" && totalItems > 0 ? (
-                <span className="absolute right-3 top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] text-primary-foreground">
+                <span className="absolute right-2 top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] text-primary-foreground">
                   {totalItems}
                 </span>
               ) : null}

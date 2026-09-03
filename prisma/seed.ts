@@ -130,6 +130,20 @@ const products = [
   },
 ];
 
+async function downloadImage(url: string) {
+  try {
+    const response = await fetch(url);
+    if (!response.ok) return null;
+
+    const mime = response.headers.get("content-type")?.split(";")[0] ?? "image/jpeg";
+    const imageData = Buffer.from(await response.arrayBuffer());
+
+    return { imageData, imageMimeType: mime };
+  } catch {
+    return null;
+  }
+}
+
 async function main() {
   await prisma.orderItem.deleteMany();
   await prisma.order.deleteMany();
@@ -137,16 +151,23 @@ async function main() {
   await prisma.product.deleteMany();
   await prisma.user.deleteMany();
 
-  const createdProducts = await Promise.all(
-    products.map((product) =>
-      prisma.product.create({
+  const createdProducts: Array<{ id: string }> = [];
+
+  for (const product of products) {
+    const image = await downloadImage(product.imageUrl);
+    createdProducts.push(
+      await prisma.product.create({
         data: {
-          ...product,
+          name: product.name,
+          description: product.description,
           price: product.price,
+          category: product.category,
+          imageData: image?.imageData,
+          imageMimeType: image?.imageMimeType,
         },
       }),
-    ),
-  );
+    );
+  }
 
   const menuByDay = [
     [0, 1, 4],
@@ -158,15 +179,24 @@ async function main() {
     [5, 14, 9],
   ];
 
-  for (let day = 0; day < menuByDay.length; day += 1) {
-    for (const productIndex of menuByDay[day]) {
+  const today = new Date();
+
+  for (let offset = 0; offset < 14; offset += 1) {
+    const local = new Date(today);
+    local.setDate(today.getDate() + offset);
+    const date = new Date(
+      Date.UTC(local.getFullYear(), local.getMonth(), local.getDate()),
+    );
+    const variant = menuByDay[offset % menuByDay.length];
+
+    for (const productIndex of variant) {
       const product = createdProducts[productIndex];
       if (!product) continue;
 
       await prisma.menuSchedule.create({
         data: {
           productId: product.id,
-          dayOfWeek: day,
+          date,
         },
       });
     }
@@ -179,7 +209,7 @@ async function main() {
     },
   });
 
-  console.log(`Seeded ${createdProducts.length} products and weekly menu.`);
+  console.log(`Seeded ${createdProducts.length} products and 14 days of menu.`);
 }
 
 main()

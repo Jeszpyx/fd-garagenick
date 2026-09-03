@@ -1,13 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Minus, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { useCartStore } from "@/store/cart";
 import { formatPrice } from "@/lib/utils";
+import { ProductImage } from "@/components/product-image";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 
@@ -61,12 +61,12 @@ export default function CartPage() {
 
   if (items.length === 0) {
     return (
-      <div className="glass-panel mx-auto max-w-xl rounded-3xl p-10 text-center">
+      <div className="glass-panel mx-auto max-w-xl rounded-2xl p-6 text-center sm:rounded-3xl sm:p-10">
         <h1 className="text-2xl font-semibold">Корзина пуста</h1>
         <p className="mt-2 text-muted-foreground">
           Добавьте блюда из меню или каталога.
         </p>
-        <Button className="mt-6" onClick={() => router.push("/catalog")}>
+        <Button className="mt-6 w-full sm:w-auto" onClick={() => router.push("/catalog")}>
           Перейти в каталог
         </Button>
       </div>
@@ -76,49 +76,49 @@ export default function CartPage() {
   return (
     <div className="mx-auto grid max-w-5xl gap-6 lg:grid-cols-[1.4fr_0.8fr]">
       <div className="space-y-4">
-        <h1 className="text-3xl font-bold">Корзина</h1>
+        <h1 className="text-2xl font-bold sm:text-3xl">Корзина</h1>
         {items.map((item) => (
           <Card key={item.productId} className="overflow-hidden">
-            <CardContent className="flex items-center gap-4 p-4">
-              <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-2xl bg-muted">
-                {item.imageUrl ? (
-                  <Image
+            <CardContent className="flex flex-col gap-3 p-3 sm:flex-row sm:items-center sm:gap-4 sm:p-4">
+              <div className="flex min-w-0 items-center gap-3">
+                <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-2xl bg-muted sm:h-20 sm:w-20">
+                  <ProductImage
                     src={item.imageUrl}
                     alt={item.name}
-                    fill
-                    className="object-cover"
                     sizes="80px"
                   />
-                ) : null}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <h3 className="truncate font-semibold">{item.name}</h3>
+                  <p className="text-sm text-muted-foreground">
+                    {formatPrice(item.price)}
+                  </p>
+                </div>
               </div>
-              <div className="flex-1">
-                <h3 className="font-semibold">{item.name}</h3>
-                <p className="text-sm text-muted-foreground">
-                  {formatPrice(item.price)}
-                </p>
-              </div>
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={() =>
-                    updateQuantity(item.productId, item.quantity - 1)
-                  }
-                >
-                  <Minus className="h-4 w-4" />
-                </Button>
-                <span className="w-6 text-center font-medium">
-                  {item.quantity}
-                </span>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={() =>
-                    updateQuantity(item.productId, item.quantity + 1)
-                  }
-                >
-                  <Plus className="h-4 w-4" />
-                </Button>
+              <div className="flex items-center justify-between gap-2 sm:justify-end">
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() =>
+                      updateQuantity(item.productId, item.quantity - 1)
+                    }
+                  >
+                    <Minus className="h-4 w-4" />
+                  </Button>
+                  <span className="w-6 text-center font-medium">
+                    {item.quantity}
+                  </span>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() =>
+                      updateQuantity(item.productId, item.quantity + 1)
+                    }
+                  >
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                </div>
                 <Button
                   variant="ghost"
                   size="icon"
@@ -132,7 +132,7 @@ export default function CartPage() {
         ))}
       </div>
 
-      <Card className="h-fit p-6">
+      <Card className="h-fit p-5 sm:p-6 lg:sticky lg:top-24">
         <h2 className="text-xl font-semibold">Итого</h2>
         <p className="mt-4 text-3xl font-bold text-primary">
           {formatPrice(totalPrice)}

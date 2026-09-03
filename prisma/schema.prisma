@@ -19,17 +19,18 @@ model User {
 }
 
 model Product {
-  id          String         @id @default(cuid())
-  name        String
-  description String?
-  price       Decimal        @db.Decimal(10, 2)
-  imageUrl    String?
-  category    String?
-  isActive    Boolean        @default(true)
-  createdAt   DateTime       @default(now())
-  updatedAt   DateTime       @updatedAt
-  menuItems   MenuSchedule[]
-  orderItems  OrderItem[]
+  id            String         @id @default(cuid())
+  name          String
+  description   String?
+  price         Decimal        @db.Decimal(10, 2)
+  imageData     Bytes?
+  imageMimeType String?
+  category      String?
+  isActive      Boolean        @default(true)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  menuItems     MenuSchedule[]
+  orderItems    OrderItem[]
 
   @@index([isActive])
   @@index([category])
@@ -39,12 +40,12 @@ model MenuSchedule {
   id        String   @id @default(cuid())
   productId String
   product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
-  dayOfWeek Int
+  date      DateTime @db.Date
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@unique([productId, dayOfWeek])
-  @@index([dayOfWeek])
+  @@unique([productId, date])
+  @@index([date])
 }
 
 model Order {

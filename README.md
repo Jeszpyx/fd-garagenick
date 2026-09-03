@@ -65,7 +65,8 @@ npm run dev
 | Endpoint | Auth | Описание |
 |----------|------|----------|
 | `GET /api/products` | — | Каталог |
-| `GET /api/menu?day=0` | — | Меню дня |
+| `GET /api/menu?date=2026-09-21` | — | Меню на дату |
+| `GET /api/menu?from=&to=` | — | Меню за период |
 | `GET /api/menu/today` | — | Меню сегодня |
 | `POST /api/auth/send-otp` | — | Отправка OTP |
 | `POST /api/auth/verify-otp` | — | Проверка OTP |
@@ -73,7 +74,59 @@ npm run dev
 | `GET/POST /api/admin/products` | Bearer | CRUD товаров |
 | `GET/POST /api/admin/menu` | Bearer | Календарь меню |
 
-## Стек
+## Деплой на Vercel
+
+Фреймворк: **Next.js**. Команды уже прописаны в проекте — в настройках Vercel их можно не менять.
+
+| Поле | Значение |
+|------|----------|
+| Framework Preset | Next.js |
+| Install Command | `npm install --legacy-peer-deps` (или оставить Auto) |
+| Build Command | `npm run build` |
+| Output Directory | не трогать (Next.js) |
+
+`npm run build` делает:
+
+1. `prisma generate` — клиент Prisma
+2. `prisma migrate deploy` — миграции в прод-БД
+3. `next build`
+
+Дополнительно `postinstall` тоже запускает `prisma generate`.
+
+### Переменные окружения (Settings → Environment Variables)
+
+Добавьте для **Production** и **Preview**:
+
+```
+DATABASE_URL
+JWT_SECRET
+ADMIN_LOGIN
+ADMIN_PASSWORD
+```
+
+`DATABASE_URL` — строка **hosted PostgreSQL** (Neon, Supabase, Vercel Postgres). Локальный Docker с Vercel не достучится.
+
+Пример Neon:
+
+```
+postgresql://USER:PASSWORD@HOST/DB?sslmode=require
+```
+
+Для serverless лучше pooled-URL провайдера. Миграции на этапе билда требуют, чтобы БД была доступна из интернета.
+
+После первого деплоя при необходимости заполните меню:
+
+```bash
+npx prisma db seed
+```
+
+локально с `DATABASE_URL` от продакшена — или через `npx prisma db seed` в окружении с этими переменными.
+
+### Важно
+
+- Mock OTP хранится в памяти инстанса: на Vercel код из SMS может не совпасть между запросами. Для продакшена позже нужен Redis/БД.
+- Лимит тела запроса Vercel ~4.5 МБ, крупные фото могут не пройти.
+
 
 - Next.js App Router + TypeScript
 - PostgreSQL + Prisma ORM

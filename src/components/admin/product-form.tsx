@@ -20,7 +20,6 @@ type FormState = {
   name: string;
   description: string;
   price: string;
-  imageUrl: string;
   category: string;
   isActive: boolean;
 };
@@ -29,13 +28,15 @@ const emptyForm: FormState = {
   name: "",
   description: "",
   price: "",
-  imageUrl: "",
   category: "",
   isActive: true,
 };
 
 export function ProductForm({ editing, onSuccess, onCancel }: ProductFormProps) {
   const [form, setForm] = useState<FormState>(emptyForm);
+  const [file, setFile] = useState<File | null>(null);
+  const [preview, setPreview] = useState<string | null>(null);
+  const [removeImage, setRemoveImage] = useState(false);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -44,37 +45,56 @@ export function ProductForm({ editing, onSuccess, onCancel }: ProductFormProps) 
         name: editing.name,
         description: editing.description ?? "",
         price: String(editing.price),
-        imageUrl: editing.imageUrl ?? "",
         category: editing.category ?? "",
         isActive: editing.isActive,
       });
+      setPreview(editing.imageUrl);
+      setFile(null);
+      setRemoveImage(false);
       return;
     }
 
     setForm(emptyForm);
+    setFile(null);
+    setPreview(null);
+    setRemoveImage(false);
   }, [editing]);
+
+  useEffect(() => {
+    if (!file) return;
+
+    const objectUrl = URL.createObjectURL(file);
+    setPreview(objectUrl);
+    setRemoveImage(false);
+
+    return () => URL.revokeObjectURL(objectUrl);
+  }, [file]);
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
     setLoading(true);
 
-    const payload = {
-      name: form.name,
-      description: form.description || null,
-      price: Number(form.price),
-      imageUrl: form.imageUrl || null,
-      category: form.category || null,
-      isActive: form.isActive,
-    };
+    const payload = new FormData();
+    payload.append("name", form.name);
+    payload.append("description", form.description);
+    payload.append("price", form.price);
+    payload.append("category", form.category);
+    payload.append("isActive", String(form.isActive));
+    if (file) {
+      payload.append("image", file);
+    }
+    if (removeImage) {
+      payload.append("removeImage", "true");
+    }
 
     const result = editing
       ? await adminFetch(`/api/admin/products/${editing.id}`, {
           method: "PUT",
-          body: JSON.stringify(payload),
+          body: payload,
         })
       : await adminFetch("/api/admin/products", {
           method: "POST",
-          body: JSON.stringify(payload),
+          body: payload,
         });
 
     setLoading(false);
@@ -86,6 +106,9 @@ export function ProductForm({ editing, onSuccess, onCancel }: ProductFormProps) 
 
     toast.success(editing ? "Товар обновлён" : "Товар создан");
     setForm(emptyForm);
+    setFile(null);
+    setPreview(null);
+    setRemoveImage(false);
     onSuccess();
   }
 
@@ -144,15 +167,38 @@ export function ProductForm({ editing, onSuccess, onCancel }: ProductFormProps) 
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="imageUrl">URL изображения</Label>
+            <Label htmlFor="image">Фото блюда</Label>
             <Input
-              id="imageUrl"
-              value={form.imageUrl}
-              onChange={(event) =>
-                setForm((prev) => ({ ...prev, imageUrl: event.target.value }))
-              }
+              id="image"
+              type="file"
+              className="max-w-full file:mr-3"
+              accept="image/jpeg,image/png,image/webp,image/gif"
+              onChange={(event) => setFile(event.target.files?.[0] ?? null)}
             />
+            <p className="text-xs text-muted-foreground">JPG, PNG, WEBP или GIF, до 5 МБ</p>
           </div>
+          {preview && !removeImage ? (
+            <div className="space-y-2 md:col-span-2">
+              <img
+                src={preview}
+                alt="Превью"
+                className="h-36 w-36 rounded-2xl object-cover sm:h-40 sm:w-40"
+              />
+              {editing?.imageUrl && !file ? (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setRemoveImage(true);
+                    setPreview(null);
+                  }}
+                >
+                  Удалить фото
+                </Button>
+              ) : null}
+            </div>
+          ) : null}
           <div className="flex items-center gap-2 md:col-span-2">
             <input
               id="isActive"

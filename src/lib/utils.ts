@@ -58,19 +58,88 @@ export function formatBelarusPhoneInput(phone: string) {
   return `${parts[0]} ${parts[1]}-${parts.slice(2).join("-")}`;
 }
 
-export function getTodayDayOfWeek() {
-  const jsDay = new Date().getDay();
-  return jsDay === 0 ? 6 : jsDay - 1;
+export function toDateKey(date: Date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+export function todayDateKey() {
+  return toDateKey(new Date());
+}
+
+export function isDateKey(value: string) {
+  return /^\d{4}-\d{2}-\d{2}$/.test(value);
+}
+
+export function dateKeyToLocalDate(dateKey: string) {
+  const [year, month, day] = dateKey.split("-").map(Number);
+  return new Date(year, month - 1, day);
+}
+
+export function dateKeyToUtcDate(dateKey: string) {
+  const [year, month, day] = dateKey.split("-").map(Number);
+  return new Date(Date.UTC(year, month - 1, day));
+}
+
+export function dbDateToKey(date: Date) {
+  return date.toISOString().slice(0, 10);
+}
+
+export function addDaysToDateKey(dateKey: string, days: number) {
+  const date = dateKeyToLocalDate(dateKey);
+  date.setDate(date.getDate() + days);
+  return toDateKey(date);
+}
+
+export function formatDateLabel(
+  dateKey: string,
+  options: Intl.DateTimeFormatOptions = {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+  },
+) {
+  return new Intl.DateTimeFormat("ru-RU", options).format(
+    dateKeyToLocalDate(dateKey),
+  );
+}
+
+export function getMonthCells(year: number, monthIndex: number) {
+  const first = new Date(year, monthIndex, 1);
+  const startPad = (first.getDay() + 6) % 7;
+  const daysInMonth = new Date(year, monthIndex + 1, 0).getDate();
+  const cells: Array<{ dateKey: string; day: number; inMonth: boolean }> = [];
+
+  for (let i = 0; i < startPad; i += 1) {
+    const date = new Date(year, monthIndex, 1 - (startPad - i));
+    cells.push({
+      dateKey: toDateKey(date),
+      day: date.getDate(),
+      inMonth: false,
+    });
+  }
+
+  for (let day = 1; day <= daysInMonth; day += 1) {
+    cells.push({
+      dateKey: toDateKey(new Date(year, monthIndex, day)),
+      day,
+      inMonth: true,
+    });
+  }
+
+  while (cells.length % 7 !== 0) {
+    const last = cells[cells.length - 1];
+    const nextKey = addDaysToDateKey(last.dateKey, 1);
+    cells.push({
+      dateKey: nextKey,
+      day: dateKeyToLocalDate(nextKey).getDate(),
+      inMonth: false,
+    });
+  }
+
+  return cells;
 }
 
 export const DAY_LABELS = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"] as const;
-
-export const DAY_FULL_LABELS = [
-  "Понедельник",
-  "Вторник",
-  "Среда",
-  "Четверг",
-  "Пятница",
-  "Суббота",
-  "Воскресенье",
-] as const;

@@ -18,7 +18,11 @@ export default function AdminProductsPage() {
   const [loading, setLoading] = useState(true);
 
   async function loadProducts() {
-    setLoading(true);
+    const isInitial = products.length === 0;
+    if (isInitial) {
+      setLoading(true);
+    }
+
     const result = await adminFetch<Product[]>("/api/admin/products");
     if (result.error) {
       if (result.error === "Unauthorized") {
@@ -37,23 +41,29 @@ export default function AdminProductsPage() {
   }, []);
 
   async function handleDelete(id: string) {
+    const previous = products;
+    setProducts((current) => current.filter((product) => product.id !== id));
+    if (editing?.id === id) {
+      setEditing(null);
+    }
+
     const result = await adminFetch(`/api/admin/products/${id}`, {
       method: "DELETE",
     });
 
     if (result.error) {
+      setProducts(previous);
       toast.error(result.error);
       return;
     }
 
     toast.success("Товар удалён");
-    loadProducts();
   }
 
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold">Товары</h1>
+        <h1 className="text-2xl font-bold sm:text-3xl">Товары</h1>
         <p className="text-muted-foreground">
           Управление каталогом и ценами
         </p>
@@ -83,17 +93,31 @@ export default function AdminProductsPage() {
                 key={product.id}
                 className="flex flex-col gap-3 rounded-2xl border border-border/70 p-4 md:flex-row md:items-center md:justify-between"
               >
-                <div>
-                  <p className="font-semibold">{product.name}</p>
-                  <p className="text-sm text-muted-foreground">
-                    {product.category ?? "Без категории"} ·{" "}
-                    {formatPrice(product.price)}
-                  </p>
+                <div className="flex min-w-0 items-center gap-3">
+                  {product.imageUrl ? (
+                    <img
+                      src={product.imageUrl}
+                      alt={product.name}
+                      className="h-14 w-14 rounded-xl object-cover"
+                    />
+                  ) : (
+                    <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-muted text-[10px] text-muted-foreground">
+                      нет фото
+                    </div>
+                  )}
+                  <div className="min-w-0">
+                    <p className="truncate font-semibold">{product.name}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {product.category ?? "Без категории"} ·{" "}
+                      {formatPrice(product.price)}
+                    </p>
+                  </div>
                 </div>
-                <div className="flex gap-2">
+                <div className="flex w-full gap-2 md:w-auto">
                   <Button
                     variant="outline"
                     size="sm"
+                    className="flex-1 md:flex-none"
                     onClick={() => setEditing(product)}
                   >
                     <Pencil className="h-4 w-4" />
@@ -102,6 +126,7 @@ export default function AdminProductsPage() {
                   <Button
                     variant="destructive"
                     size="sm"
+                    className="flex-1 md:flex-none"
                     onClick={() => handleDelete(product.id)}
                   >
                     <Trash2 className="h-4 w-4" />

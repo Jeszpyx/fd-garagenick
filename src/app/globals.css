@@ -68,12 +68,18 @@
   border-color: var(--border);
 }
 
+html {
+  overflow-x: clip;
+}
+
 body {
   background:
     radial-gradient(circle at top, color-mix(in oklch, var(--primary) 12%, transparent), transparent 42%),
     var(--background);
   color: var(--foreground);
   font-family: var(--font-geist-sans), system-ui, sans-serif;
+  min-width: 0;
+  padding-top: env(safe-area-inset-top);
 }
 
 .glass-panel {
@@ -81,4 +87,12 @@ body {
   backdrop-filter: blur(18px);
   border: 1px solid color-mix(in oklch, var(--border) 80%, transparent);
   box-shadow: 0 20px 60px color-mix(in oklch, var(--foreground) 8%, transparent);
+}
+
+.hide-scrollbar {
+  scrollbar-width: none;
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
 }

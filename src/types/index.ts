@@ -10,7 +10,7 @@ export type Product = {
 
 export type MenuItem = {
   id: string;
-  dayOfWeek: number;
+  date: string;
   product: Product;
 };
 

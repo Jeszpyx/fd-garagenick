@@ -1,20 +1,31 @@
 import { NextRequest } from "next/server";
-import { getMenuForDay } from "@/lib/services/catalog";
+import { getMenuForDate, getMenuForToday, getMenuInRange } from "@/lib/services/catalog";
 import { apiError, apiSuccess } from "@/lib/api/response";
-import { getTodayDayOfWeek } from "@/lib/utils";
+import { isDateKey, todayDateKey } from "@/lib/utils";
 
 export async function GET(request: NextRequest) {
   try {
-    const dayParam = request.nextUrl.searchParams.get("day");
-    const dayOfWeek =
-      dayParam === null ? getTodayDayOfWeek() : Number.parseInt(dayParam, 10);
+    const date = request.nextUrl.searchParams.get("date");
+    const from = request.nextUrl.searchParams.get("from");
+    const to = request.nextUrl.searchParams.get("to");
 
-    if (Number.isNaN(dayOfWeek) || dayOfWeek < 0 || dayOfWeek > 6) {
-      return apiError("day must be between 0 and 6", 400);
+    if (from && to) {
+      if (!isDateKey(from) || !isDateKey(to)) {
+        return apiError("from и to должны быть в формате ГГГГ-ММ-ДД", 400);
+      }
+
+      const items = await getMenuInRange(from, to);
+      return apiSuccess({ from, to, items });
     }
 
-    const menu = await getMenuForDay(dayOfWeek);
-    return apiSuccess({ dayOfWeek, items: menu });
+    if (date && !isDateKey(date)) {
+      return apiError("date должен быть в формате ГГГГ-ММ-ДД", 400);
+    }
+
+    const dateKey = date ?? todayDateKey();
+    const items = await getMenuForDate(dateKey);
+
+    return apiSuccess({ date: dateKey, items });
   } catch {
     return apiError("Не удалось загрузить меню", 500);
   }

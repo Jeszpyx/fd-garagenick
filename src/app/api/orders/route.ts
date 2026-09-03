@@ -3,6 +3,7 @@ import { requireUserSession } from "@/lib/auth/user-session";
 import { prisma } from "@/lib/prisma";
 import { apiError, apiSuccess } from "@/lib/api/response";
 import { createOrderSchema } from "@/lib/validations";
+import { serializeProduct } from "@/lib/services/catalog";
 
 export async function POST(request: NextRequest) {
   try {
@@ -16,6 +17,7 @@ export async function POST(request: NextRequest) {
 
     const productIds = parsed.data.items.map((item) => item.productId);
     const products = await prisma.product.findMany({
+      omit: { imageData: true },
       where: {
         id: { in: productIds },
         isActive: true,
@@ -51,7 +53,11 @@ export async function POST(request: NextRequest) {
       },
       include: {
         items: {
-          include: { product: true },
+          include: {
+            product: {
+              omit: { imageData: true },
+            },
+          },
         },
       },
     });
@@ -68,7 +74,7 @@ export async function POST(request: NextRequest) {
           product: {
             id: item.product.id,
             name: item.product.name,
-            imageUrl: item.product.imageUrl,
+            imageUrl: serializeProduct(item.product).imageUrl,
           },
         })),
       },

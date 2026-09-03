@@ -25,14 +25,29 @@ export const productSchema = z.object({
   name: z.string().trim().min(2).max(120),
   description: z.string().trim().max(500).optional().nullable(),
   price: z.coerce.number().positive(),
-  imageUrl: z.string().url().optional().nullable(),
   category: z.string().trim().max(60).optional().nullable(),
-  isActive: z.boolean().optional(),
+  isActive: z
+    .union([z.boolean(), z.string()])
+    .optional()
+    .transform((value) => {
+      if (value === undefined) return undefined;
+      if (typeof value === "boolean") return value;
+      return value === "true" || value === "on" || value === "1";
+    }),
 });
+
+const dateKeySchema = z
+  .string()
+  .regex(/^\d{4}-\d{2}-\d{2}$/, "Укажите дату в формате ГГГГ-ММ-ДД");
 
 export const menuScheduleSchema = z.object({
   productId: z.string().min(1),
-  dayOfWeek: z.coerce.number().int().min(0).max(6),
+  date: dateKeySchema,
+});
+
+export const menuCopySchema = z.object({
+  fromDate: dateKeySchema,
+  toDate: dateKeySchema,
 });
 
 export const orderItemSchema = z.object({

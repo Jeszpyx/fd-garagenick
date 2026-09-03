@@ -12,7 +12,7 @@ export default function OrderSuccessClient() {
 
   return (
     <div className="mx-auto max-w-lg">
-      <Card className="p-8 text-center">
+      <Card className="p-6 text-center sm:p-8">
         <CardContent className="space-y-4 p-0">
           <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-primary/15 text-primary">
             <CheckCircle2 className="h-8 w-8" />
@@ -24,7 +24,7 @@ export default function OrderSuccessClient() {
               : "Мы уже начали готовить ваш заказ."}
           </p>
           <div className="flex flex-col gap-3 pt-2">
-            <Button onClick={() => window.location.assign("/")}>
+            <Button className="w-full" onClick={() => window.location.assign("/")}>
               На главную
             </Button>
             <Link href="/menu" className="text-sm text-primary">

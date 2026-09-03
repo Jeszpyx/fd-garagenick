@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import { ProductImage } from "@/components/product-image";
 import { motion } from "framer-motion";
 import { Plus } from "lucide-react";
 import { toast } from "sonner";
@@ -33,36 +33,31 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
     <motion.div
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.05 }}
+      transition={{ delay: Math.min(index, 6) * 0.04 }}
     >
-      <Card className="overflow-hidden">
-        <div className="relative aspect-[4/3] overflow-hidden">
-          {product.imageUrl ? (
-            <Image
-              src={product.imageUrl}
-              alt={product.name}
-              fill
-              className="object-cover transition duration-500 hover:scale-105"
-              sizes="(max-width: 768px) 100vw, 33vw"
-            />
-          ) : (
-            <div className="flex h-full items-center justify-center bg-muted text-muted-foreground">
-              Нет фото
-            </div>
-          )}
+      <Card className="h-full overflow-hidden">
+        <div className="relative aspect-[16/10] overflow-hidden sm:aspect-[4/3]">
+          <ProductImage
+            src={product.imageUrl}
+            alt={product.name}
+            className="object-cover transition duration-500 hover:scale-105"
+            sizes="(max-width: 768px) 100vw, 33vw"
+          />
         </div>
-        <CardContent className="space-y-3 p-4">
-          <div className="flex items-start justify-between gap-3">
-            <div>
+        <CardContent className="space-y-3 p-3 sm:p-4">
+          <div className="flex min-w-0 items-start justify-between gap-2 sm:gap-3">
+            <div className="min-w-0">
               {product.category ? <Badge>{product.category}</Badge> : null}
-              <h3 className="mt-2 text-lg font-semibold">{product.name}</h3>
+              <h3 className="mt-2 text-base font-semibold leading-snug sm:text-lg">
+                {product.name}
+              </h3>
               {product.description ? (
                 <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">
                   {product.description}
                 </p>
               ) : null}
             </div>
-            <p className="text-lg font-bold text-primary">
+            <p className="shrink-0 text-base font-bold text-primary sm:text-lg">
               {formatPrice(product.price)}
             </p>
           </div>

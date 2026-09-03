@@ -3,7 +3,7 @@ import { requireAdmin } from "@/lib/auth/admin-auth";
 import { prisma } from "@/lib/prisma";
 import { serializeProduct } from "@/lib/services/catalog";
 import { apiError, apiSuccess } from "@/lib/api/response";
-import { productSchema } from "@/lib/validations";
+import { parseProductForm, readUploadedImage } from "@/lib/product-image";
 
 export async function GET(request: NextRequest) {
   const admin = await requireAdmin(request);
@@ -13,6 +13,7 @@ export async function GET(request: NextRequest) {
 
   try {
     const products = await prisma.product.findMany({
+      omit: { imageData: true },
       orderBy: [{ createdAt: "desc" }],
     });
 
@@ -29,26 +30,33 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const body = await request.json();
-    const parsed = productSchema.safeParse(body);
+    const formData = await request.formData();
+    const { parsed, imageFile } = parseProductForm(formData);
 
     if (!parsed.success) {
       return apiError(parsed.error.issues[0]?.message ?? "Invalid product", 400);
     }
+
+    const image = await readUploadedImage(imageFile);
 
     const product = await prisma.product.create({
       data: {
         name: parsed.data.name,
         description: parsed.data.description ?? null,
         price: parsed.data.price,
-        imageUrl: parsed.data.imageUrl ?? null,
         category: parsed.data.category ?? null,
         isActive: parsed.data.isActive ?? true,
+        imageData: image?.imageData,
+        imageMimeType: image?.imageMimeType,
       },
+      omit: { imageData: true },
     });
 
     return apiSuccess(serializeProduct(product), 201);
-  } catch {
+  } catch (error) {
+    if (error instanceof Error) {
+      return apiError(error.message, 400);
+    }
     return apiError("Не удалось создать товар", 500);
   }
 }

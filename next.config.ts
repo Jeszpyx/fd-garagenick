@@ -1,11 +1,14 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  outputFileTracingIncludes: {
+    "/": ["./generated/prisma/**/*"],
+    "/api/**": ["./generated/prisma/**/*"],
+  },
   images: {
-    remotePatterns: [
+    localPatterns: [
       {
-        protocol: "https",
-        hostname: "images.unsplash.com",
+        pathname: "/api/products/**",
       },
     ],
   },

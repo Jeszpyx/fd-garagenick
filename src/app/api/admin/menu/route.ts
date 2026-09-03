@@ -1,9 +1,15 @@
 import { NextRequest } from "next/server";
 import { requireAdmin } from "@/lib/auth/admin-auth";
 import { prisma } from "@/lib/prisma";
-import { getWeeklyMenu, serializeProduct } from "@/lib/services/catalog";
+import { getMenuInRange, serializeMenuItem } from "@/lib/services/catalog";
 import { apiError, apiSuccess } from "@/lib/api/response";
 import { menuScheduleSchema } from "@/lib/validations";
+import {
+  addDaysToDateKey,
+  dateKeyToUtcDate,
+  isDateKey,
+  todayDateKey,
+} from "@/lib/utils";
 
 export async function GET(request: NextRequest) {
   const admin = await requireAdmin(request);
@@ -12,8 +18,17 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const menu = await getWeeklyMenu();
-    return apiSuccess(menu);
+    const fromParam = request.nextUrl.searchParams.get("from");
+    const toParam = request.nextUrl.searchParams.get("to");
+    const from =
+      fromParam && isDateKey(fromParam)
+        ? fromParam
+        : todayDateKey().slice(0, 8) + "01";
+    const to =
+      toParam && isDateKey(toParam) ? toParam : addDaysToDateKey(from, 40);
+
+    const menu = await getMenuInRange(from, to, false);
+    return apiSuccess({ from, to, items: menu });
   } catch {
     return apiError("Не удалось загрузить меню", 500);
   }
@@ -41,29 +56,24 @@ export async function POST(request: NextRequest) {
       return apiError("Товар не найден", 404);
     }
 
+    const date = dateKeyToUtcDate(parsed.data.date);
+
     const item = await prisma.menuSchedule.upsert({
       where: {
-        productId_dayOfWeek: {
+        productId_date: {
           productId: parsed.data.productId,
-          dayOfWeek: parsed.data.dayOfWeek,
+          date,
         },
       },
       update: {},
       create: {
         productId: parsed.data.productId,
-        dayOfWeek: parsed.data.dayOfWeek,
+        date,
       },
       include: { product: true },
     });
 
-    return apiSuccess(
-      {
-        id: item.id,
-        dayOfWeek: item.dayOfWeek,
-        product: serializeProduct(item.product),
-      },
-      201,
-    );
+    return apiSuccess(serializeMenuItem(item), 201);
   } catch {
     return apiError("Не удалось добавить блюдо в меню", 500);
   }

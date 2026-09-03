@@ -36,7 +36,7 @@ export default function CatalogPage() {
   return (
     <div className="space-y-6">
       <div className="space-y-2">
-        <h1 className="text-3xl font-bold">Каталог</h1>
+        <h1 className="text-2xl font-bold sm:text-3xl">Каталог</h1>
         <p className="text-muted-foreground">
           Все доступные блюда и напитки
         </p>
@@ -57,7 +57,7 @@ export default function CatalogPage() {
           Ничего не найдено.
         </div>
       ) : (
-        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-4 min-[480px]:grid-cols-2 lg:grid-cols-3 lg:gap-5">
           {filtered.map((product, index) => (
             <ProductCard key={product.id} product={product} index={index} />
           ))}

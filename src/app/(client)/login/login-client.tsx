@@ -110,7 +110,7 @@ export default function LoginPageClient() {
                     placeholder="29 123-45-67"
                     value={formatBelarusPhoneInput(localPhone)}
                     onChange={(event) => handlePhoneChange(event.target.value)}
-                    className="border-0 bg-transparent focus-visible:ring-0"
+                    className="min-w-0 border-0 bg-transparent focus-visible:ring-0"
                   />
                 </div>
                 <p className="text-xs text-muted-foreground">

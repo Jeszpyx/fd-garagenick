@@ -1,14 +1,15 @@
-import { getMenuForDay } from "@/lib/services/catalog";
+import { getMenuForToday } from "@/lib/services/catalog";
 import { apiError, apiSuccess } from "@/lib/api/response";
-import { getTodayDayOfWeek } from "@/lib/utils";
+import { todayDateKey } from "@/lib/utils";
 
 export async function GET() {
   try {
-    const dayOfWeek = getTodayDayOfWeek();
-    const menu = await getMenuForDay(dayOfWeek);
+    const date = todayDateKey();
+    const items = await getMenuForToday();
 
-    return apiSuccess({ dayOfWeek, items: menu });
-  } catch {
+    return apiSuccess({ date, items });
+  } catch (error) {
+    console.error("GET /api/menu/today", error);
     return apiError("Не удалось загрузить меню на сегодня", 500);
   }
 }
