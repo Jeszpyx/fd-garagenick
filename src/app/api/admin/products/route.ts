@@ -1,0 +1,54 @@
+import { NextRequest } from "next/server";
+import { requireAdmin } from "@/lib/auth/admin-auth";
+import { prisma } from "@/lib/prisma";
+import { serializeProduct } from "@/lib/services/catalog";
+import { apiError, apiSuccess } from "@/lib/api/response";
+import { productSchema } from "@/lib/validations";
+
+export async function GET(request: NextRequest) {
+  const admin = await requireAdmin(request);
+  if (!admin) {
+    return apiError("Unauthorized", 401);
+  }
+
+  try {
+    const products = await prisma.product.findMany({
+      orderBy: [{ createdAt: "desc" }],
+    });
+
+    return apiSuccess(products.map(serializeProduct));
+  } catch {
+    return apiError("Не удалось загрузить товары", 500);
+  }
+}
+
+export async function POST(request: NextRequest) {
+  const admin = await requireAdmin(request);
+  if (!admin) {
+    return apiError("Unauthorized", 401);
+  }
+
+  try {
+    const body = await request.json();
+    const parsed = productSchema.safeParse(body);
+
+    if (!parsed.success) {
+      return apiError(parsed.error.issues[0]?.message ?? "Invalid product", 400);
+    }
+
+    const product = await prisma.product.create({
+      data: {
+        name: parsed.data.name,
+        description: parsed.data.description ?? null,
+        price: parsed.data.price,
+        imageUrl: parsed.data.imageUrl ?? null,
+        category: parsed.data.category ?? null,
+        isActive: parsed.data.isActive ?? true,
+      },
+    });
+
+    return apiSuccess(serializeProduct(product), 201);
+  } catch {
+    return apiError("Не удалось создать товар", 500);
+  }
+}

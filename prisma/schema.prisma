@@ -1,0 +1,82 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id        String   @id @default(cuid())
+  phone     String   @unique
+  name      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  orders    Order[]
+
+  @@index([phone])
+}
+
+model Product {
+  id          String         @id @default(cuid())
+  name        String
+  description String?
+  price       Decimal        @db.Decimal(10, 2)
+  imageUrl    String?
+  category    String?
+  isActive    Boolean        @default(true)
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  menuItems   MenuSchedule[]
+  orderItems  OrderItem[]
+
+  @@index([isActive])
+  @@index([category])
+}
+
+model MenuSchedule {
+  id        String   @id @default(cuid())
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  dayOfWeek Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([productId, dayOfWeek])
+  @@index([dayOfWeek])
+}
+
+model Order {
+  id        String      @id @default(cuid())
+  userId    String
+  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  status    OrderStatus @default(PENDING)
+  total     Decimal     @db.Decimal(10, 2)
+  items     OrderItem[]
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+
+  @@index([userId])
+  @@index([status])
+}
+
+model OrderItem {
+  id        String  @id @default(cuid())
+  orderId   String
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+  quantity  Int
+  price     Decimal @db.Decimal(10, 2)
+
+  @@index([orderId])
+  @@index([productId])
+}
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  DELIVERED
+  CANCELLED
+}
