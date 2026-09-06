@@ -67,7 +67,24 @@ export const createOrderSchema = z.object({
   items: z.array(orderItemSchema).min(1),
 });
 
+export const notificationSettingsSchema = z.object({
+  adminEmails: z
+    .array(z.string().trim().email("Некорректный email"))
+    .max(50),
+  telegramChatIds: z
+    .array(
+      z
+        .string()
+        .trim()
+        .regex(/^-?\d+$/, "Telegram ID должен быть числом"),
+    )
+    .max(50),
+});
+
 export type ProductInput = z.infer<typeof productSchema>;
 export type CategoryInput = z.infer<typeof categorySchema>;
 export type MenuScheduleInput = z.infer<typeof menuScheduleSchema>;
 export type CreateOrderInput = z.infer<typeof createOrderSchema>;
+export type NotificationSettingsInput = z.infer<
+  typeof notificationSettingsSchema
+>;

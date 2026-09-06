@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { apiError, apiSuccess } from "@/lib/api/response";
 import { createOrderSchema } from "@/lib/validations";
 import { getMenuForDate, serializeProduct } from "@/lib/services/catalog";
+import { notifyAdminsAboutOrder } from "@/lib/services/notify";
 
 export async function POST(request: NextRequest) {
   try {
@@ -25,8 +26,13 @@ export async function POST(request: NextRequest) {
 
     const productTotals = new Map<
       string,
-      { quantity: number; price: number }
+      { quantity: number; price: number; name: string }
     >();
+    const daysForNotify: Array<{
+      date: string;
+      quantity: number;
+      productNames: string[];
+    }> = [];
     let total = 0;
 
     for (const [date, dayQty] of dayQuantities) {
@@ -34,6 +40,12 @@ export async function POST(request: NextRequest) {
       if (menuItems.length === 0) {
         return apiError(`На ${date} меню не назначено`, 400);
       }
+
+      daysForNotify.push({
+        date,
+        quantity: dayQty,
+        productNames: menuItems.map((item) => item.product.name),
+      });
 
       for (const menuItem of menuItems) {
         const price = menuItem.product.price;
@@ -44,7 +56,11 @@ export async function POST(request: NextRequest) {
         if (existing) {
           existing.quantity += quantity;
         } else {
-          productTotals.set(menuItem.product.id, { quantity, price });
+          productTotals.set(menuItem.product.id, {
+            quantity,
+            price,
+            name: menuItem.product.name,
+          });
         }
       }
     }
@@ -66,6 +82,9 @@ export async function POST(request: NextRequest) {
         },
       },
       include: {
+        user: {
+          select: { id: true, phone: true, name: true },
+        },
         items: {
           include: {
             product: {
@@ -74,6 +93,22 @@ export async function POST(request: NextRequest) {
           },
         },
       },
+    });
+
+    void notifyAdminsAboutOrder({
+      orderId: order.id,
+      createdAt: order.createdAt,
+      total: Number(order.total),
+      customer: {
+        name: order.user.name,
+        phone: order.user.phone,
+      },
+      days: daysForNotify.sort((a, b) => a.date.localeCompare(b.date)),
+      items: order.items.map((item) => ({
+        name: item.product.name,
+        quantity: item.quantity,
+        price: Number(item.price),
+      })),
     });
 
     return apiSuccess(

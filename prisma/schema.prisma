@@ -96,3 +96,11 @@ enum OrderStatus {
   DELIVERED
   CANCELLED
 }
+
+/// Singleton: id всегда 1. Список получателей уведомлений (не секреты).
+model NotificationSettings {
+  id              Int      @id @default(1)
+  adminEmails     String[] @default([])
+  telegramChatIds String[] @default([])
+  updatedAt       DateTime @updatedAt
+}
