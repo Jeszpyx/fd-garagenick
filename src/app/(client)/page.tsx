@@ -16,7 +16,7 @@ export default async function HomePage() {
 
   return (
     <div>
-      <section className="relative left-1/2 w-screen max-w-[100vw] -translate-x-1/2 -mt-14 sm:-mt-16">
+      <section className="-mt-14 sm:-mt-16">
         <div className="relative isolate min-h-[min(92dvh,880px)] overflow-hidden">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
@@ -29,7 +29,7 @@ export default async function HomePage() {
 
           <div className="relative mx-auto flex min-h-[min(92dvh,880px)] max-w-6xl flex-col justify-end px-4 pb-16 pt-28 sm:px-6 sm:pb-20 md:justify-center md:pb-24 md:pt-20">
             <p className="site-rise font-display text-4xl font-semibold tracking-tight text-white sm:text-5xl md:text-6xl lg:text-7xl">
-              GarageNick
+              Кафе Василёк
             </p>
             <h1 className="site-rise site-rise-delay-1 mt-4 max-w-xl font-display text-2xl font-medium leading-snug text-white/95 sm:text-3xl md:text-4xl">
               Готовое меню на день — с доставкой
@@ -50,7 +50,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section className="space-y-5 px-4 pt-10 sm:px-6 sm:pt-14">
+      <section className="mx-auto max-w-6xl space-y-5 px-4 pt-10 sm:px-6 sm:pt-14">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between sm:gap-4">
           <div className="min-w-0">
             <p className="text-sm font-medium text-[oklch(0.45_0.08_155)]">

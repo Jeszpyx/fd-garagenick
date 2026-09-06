@@ -37,7 +37,7 @@ export default function AdminLayout({
         <div className="mb-3 flex items-center justify-between gap-3 md:mb-8 md:block">
           <div>
             <p className="text-xs text-muted-foreground md:text-sm">Admin</p>
-            <h1 className="text-lg font-bold md:text-xl">GarageNick</h1>
+            <h1 className="text-lg font-bold md:text-xl">Кафе Василёк</h1>
           </div>
           <Button
             variant="outline"

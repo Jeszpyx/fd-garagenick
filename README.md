@@ -1,4 +1,4 @@
-# GarageNick — Food Delivery
+# Кафе Василёк — доставка еды
 
 Современный сайт доставки еды на **Next.js 16**, **PostgreSQL** и **Prisma 7**.
 

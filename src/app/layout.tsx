@@ -32,13 +32,13 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   title: {
-    default: "GarageNick — доставка еды",
-    template: "%s | GarageNick",
+    default: "Кафе Василёк — доставка еды",
+    template: "%s | Кафе Василёк",
   },
   description:
     "Доставка готового меню на день: свежие блюда, калории и состав — выбирайте дату и оформляйте заказ.",
   openGraph: {
-    title: "GarageNick — доставка еды",
+    title: "Кафе Василёк — доставка еды",
     description: "Заказывайте готовый день с доставкой",
     type: "website",
   },

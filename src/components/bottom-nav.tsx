@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { CalendarDays, Home, ShoppingCart } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useCartStore } from "@/store/cart";
+import { useCartItemCount } from "@/store/cart";
 
 const links = [
   { href: "/", label: "Главная", icon: Home },
@@ -14,7 +14,7 @@ const links = [
 
 export function BottomNav() {
   const pathname = usePathname();
-  const totalItems = useCartStore((state) => state.totalItems());
+  const totalItems = useCartItemCount();
 
   return (
     <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-border/50 bg-[color-mix(in_oklch,var(--background)_92%,transparent)] pb-[env(safe-area-inset-bottom)] backdrop-blur-xl md:hidden">

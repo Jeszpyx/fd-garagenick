@@ -45,7 +45,7 @@ export default function MenuPage() {
   const products = items.map((item) => item.product);
 
   return (
-    <div className="space-y-6 px-4 pt-4 sm:px-6 sm:pt-6">
+    <div className="mx-auto max-w-6xl space-y-6 px-4 pt-4 sm:px-6 sm:pt-6">
       <div>
         <p className="text-sm font-medium text-[oklch(0.45_0.08_155)]">
           Заказ по дням

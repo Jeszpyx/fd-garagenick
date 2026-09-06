@@ -1,6 +1,5 @@
 "use client";
 
-import { motion } from "framer-motion";
 import { Plus } from "lucide-react";
 import { toast } from "sonner";
 import type { Product } from "@/types";
@@ -15,7 +14,7 @@ type DayMenuCardProps = {
   index?: number;
 };
 
-export function DayMenuCard({ date, products, index = 0 }: DayMenuCardProps) {
+export function DayMenuCard({ date, products }: DayMenuCardProps) {
   const addDay = useCartStore((state) => state.addDay);
   const dayPrice = products.reduce((sum, product) => sum + product.price, 0);
   const productNames = products.map((product) => product.name);
@@ -32,12 +31,7 @@ export function DayMenuCard({ date, products, index = 0 }: DayMenuCardProps) {
   }
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: Math.min(index, 6) * 0.05, duration: 0.45 }}
-      className="overflow-hidden rounded-[1.75rem] site-surface"
-    >
+    <div className="site-surface overflow-hidden rounded-[1.75rem]">
       <div className="relative aspect-[16/10] overflow-hidden bg-muted sm:aspect-[21/9]">
         <ProductImage
           src={cover}
@@ -67,12 +61,9 @@ export function DayMenuCard({ date, products, index = 0 }: DayMenuCardProps) {
             Состав ({products.length})
           </p>
           <ul className="divide-y divide-border/60">
-            {products.map((product, productIndex) => (
-              <motion.li
+            {products.map((product) => (
+              <li
                 key={product.id}
-                initial={{ opacity: 0, x: -8 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.08 + productIndex * 0.04 }}
                 className="flex items-start justify-between gap-3 py-3 text-sm first:pt-0 last:pb-0"
               >
                 <div className="min-w-0">
@@ -91,7 +82,7 @@ export function DayMenuCard({ date, products, index = 0 }: DayMenuCardProps) {
                 <span className="shrink-0 font-medium text-primary">
                   {formatPrice(product.price)}
                 </span>
-              </motion.li>
+              </li>
             ))}
           </ul>
         </div>
@@ -101,6 +92,6 @@ export function DayMenuCard({ date, products, index = 0 }: DayMenuCardProps) {
           В корзину
         </Button>
       </div>
-    </motion.div>
+    </div>
   );
 }

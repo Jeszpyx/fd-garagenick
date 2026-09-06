@@ -13,6 +13,8 @@ export type CartItem = {
 
 type CartState = {
   items: CartItem[];
+  hasHydrated: boolean;
+  setHasHydrated: (value: boolean) => void;
   addDay: (
     item: Omit<CartItem, "quantity">,
     quantity?: number,
@@ -28,6 +30,8 @@ export const useCartStore = create<CartState>()(
   persist(
     (set, get) => ({
       items: [],
+      hasHydrated: false,
+      setHasHydrated: (value) => set({ hasHydrated: value }),
       addDay: (item, quantity = 1) => {
         set((state) => {
           const existing = state.items.find(
@@ -81,6 +85,17 @@ export const useCartStore = create<CartState>()(
     }),
     {
       name: "food-delivery-cart-v2",
+      skipHydration: true,
+      partialize: (state) => ({ items: state.items }),
+      onRehydrateStorage: () => (state) => {
+        state?.setHasHydrated(true);
+      },
     },
   ),
 );
+
+export function useCartItemCount() {
+  const hasHydrated = useCartStore((state) => state.hasHydrated);
+  const totalItems = useCartStore((state) => state.totalItems());
+  return hasHydrated ? totalItems : 0;
+}

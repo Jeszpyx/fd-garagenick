@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { UserRound } from "lucide-react";
-import { useCartStore } from "@/store/cart";
+import { useCartItemCount } from "@/store/cart";
 import { cn } from "@/lib/utils";
 
 const navLinks = [
@@ -13,7 +13,7 @@ const navLinks = [
 
 export function Header() {
   const pathname = usePathname();
-  const totalItems = useCartStore((state) => state.totalItems());
+  const totalItems = useCartItemCount();
   const isHome = pathname === "/";
 
   return (
@@ -33,7 +33,7 @@ export function Header() {
               isHome ? "text-white drop-shadow-sm" : "text-foreground",
             )}
           >
-            GarageNick
+            Кафе Василёк
           </span>
         </Link>
 
