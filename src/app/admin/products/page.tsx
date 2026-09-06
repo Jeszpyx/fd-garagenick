@@ -112,7 +112,14 @@ export default function AdminProductsPage() {
                     </div>
                   )}
                   <div className="min-w-0">
-                    <p className="truncate font-semibold">{product.name}</p>
+                    <p className="truncate font-semibold">
+                      {product.name}
+                      {!product.isActive ? (
+                        <span className="ml-2 text-xs font-normal text-muted-foreground">
+                          неактивен
+                        </span>
+                      ) : null}
+                    </p>
                     <p className="text-sm text-muted-foreground">
                       {product.category ?? "Без категории"} ·{" "}
                       {formatPrice(product.price)}

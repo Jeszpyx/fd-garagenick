@@ -29,7 +29,10 @@ export async function POST(request: NextRequest) {
 
     await prisma.$transaction(async (tx) => {
       const source = await tx.menuSchedule.findMany({
-        where: { date: fromDate },
+        where: {
+          date: fromDate,
+          product: { isActive: true },
+        },
       });
 
       await tx.menuSchedule.deleteMany({ where: { date: toDate } });
@@ -47,7 +50,7 @@ export async function POST(request: NextRequest) {
     const items = await getMenuInRange(
       parsed.data.toDate,
       parsed.data.toDate,
-      false,
+      true,
       "lite",
     );
     return apiSuccess({

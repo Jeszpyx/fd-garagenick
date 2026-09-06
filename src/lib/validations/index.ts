@@ -41,7 +41,11 @@ export const productSchema = z.object({
 });
 
 export const categorySchema = z.object({
-  name: z.string().trim().min(2).max(60),
+  name: z
+    .string()
+    .trim()
+    .min(2, "Минимум 2 символа")
+    .max(60, "Максимум 60 символов"),
 });
 
 const dateKeySchema = z

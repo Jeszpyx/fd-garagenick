@@ -40,6 +40,28 @@ npm run db:migrate
 npm run db:seed
 ```
 
+Seed заполняет **категории**, **товары** (с фото) и **меню на 14 дней**.  
+На Vercel seed **не** запускается — только локально по желанию.
+
+Перезаписать БД с нуля:
+
+```bash
+npm run db:seed:force
+```
+
+Сид удалённой БД (PowerShell):
+
+```powershell
+$env:SEED_DATABASE_URL="postgres://USER:PASSWORD@HOST:5432/postgres?sslmode=require"
+npm run db:seed:force
+```
+
+Или через флаг:
+
+```bash
+npm run db:seed:force -- --url "postgres://USER:PASSWORD@HOST:5432/postgres?sslmode=require"
+```
+
 ### 5. Dev-сервер
 
 ```bash
@@ -114,13 +136,14 @@ postgresql://USER:PASSWORD@HOST/DB?sslmode=require
 
 Для serverless лучше pooled-URL провайдера. Миграции на этапе билда требуют, чтобы БД была доступна из интернета.
 
-После первого деплоя при необходимости заполните меню:
+После первого деплоя при необходимости заполните меню локально:
 
-```bash
-npx prisma db seed
+```powershell
+$env:SEED_DATABASE_URL="postgres://USER:PASSWORD@HOST:5432/postgres?sslmode=require"
+npm run db:seed:force
 ```
 
-локально с `DATABASE_URL` от продакшена — или через `npx prisma db seed` в окружении с этими переменными.
+`--force` очищает товары/категории/меню/заказы и заливает демо-данные заново.
 
 ### Важно
 

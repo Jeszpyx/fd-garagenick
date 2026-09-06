@@ -52,8 +52,28 @@ export async function DELETE(request: NextRequest, context: RouteContext) {
 
   try {
     const { id } = await context.params;
-    await prisma.category.delete({ where: { id } });
-    return apiSuccess({ success: true });
+
+    const category = await prisma.category.findUnique({
+      where: { id },
+      select: { id: true, name: true, _count: { select: { products: true } } },
+    });
+
+    if (!category) {
+      return apiError("Категория не найдена", 404);
+    }
+
+    await prisma.$transaction(async (tx) => {
+      await tx.product.updateMany({
+        where: { categoryId: id },
+        data: { isActive: false },
+      });
+      await tx.category.delete({ where: { id } });
+    });
+
+    return apiSuccess({
+      success: true,
+      deactivatedProducts: category._count.products,
+    });
   } catch {
     return apiError("Не удалось удалить категорию", 500);
   }

@@ -45,6 +45,15 @@ export default function AdminCategoriesPage() {
       return;
     }
 
+    if (
+      categories.some(
+        (category) => category.name.toLowerCase() === trimmed.toLowerCase(),
+      )
+    ) {
+      toast.error("Категория с таким названием уже есть");
+      return;
+    }
+
     setSaving(true);
     const result = await adminFetch<Category>("/api/admin/categories", {
       method: "POST",
@@ -62,11 +71,21 @@ export default function AdminCategoriesPage() {
     void loadCategories();
   }
 
-  async function handleDelete(id: string) {
+  async function handleDelete(id: string, categoryName: string) {
+    const confirmed = window.confirm(
+      `Удалить категорию «${categoryName}»?\n\nВсе товары этой категории станут неактивными: они перестанут показываться в меню на сайте и в календаре админки. Сами товары не удаляются — их можно снова активировать в разделе «Товары».`,
+    );
+    if (!confirmed) {
+      return;
+    }
+
     const previous = categories;
     setCategories((current) => current.filter((item) => item.id !== id));
 
-    const result = await adminFetch(`/api/admin/categories/${id}`, {
+    const result = await adminFetch<{
+      success: boolean;
+      deactivatedProducts: number;
+    }>(`/api/admin/categories/${id}`, {
       method: "DELETE",
     });
 
@@ -76,7 +95,12 @@ export default function AdminCategoriesPage() {
       return;
     }
 
-    toast.success("Категория удалена");
+    const count = result.data?.deactivatedProducts ?? 0;
+    toast.success(
+      count > 0
+        ? `Категория удалена, товаров деактивировано: ${count}`
+        : "Категория удалена",
+    );
   }
 
   return (
@@ -127,7 +151,7 @@ export default function AdminCategoriesPage() {
                 <Button
                   variant="ghost"
                   size="icon"
-                  onClick={() => void handleDelete(category.id)}
+                  onClick={() => void handleDelete(category.id, category.name)}
                   aria-label="Удалить"
                 >
                   <Trash2 className="h-4 w-4" />
