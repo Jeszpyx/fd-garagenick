@@ -42,11 +42,19 @@ export async function readUploadedImage(file: File | null) {
 }
 
 export function parseProductForm(formData: FormData) {
+  const rawCategoryId = formData.get("categoryId");
+  const categoryId =
+    typeof rawCategoryId === "string" ? rawCategoryId.trim() : "";
+
   const parsed = productSchema.safeParse({
     name: formData.get("name"),
-    description: formData.get("description") || null,
+    description: formData.get("description") || "",
     price: formData.get("price"),
-    category: formData.get("category") || null,
+    calories: formData.get("calories") ?? 0,
+    proteins: formData.get("proteins") ?? 0,
+    fats: formData.get("fats") ?? 0,
+    carbs: formData.get("carbs") ?? 0,
+    categoryId,
     isActive: formData.get("isActive") ?? true,
   });
 

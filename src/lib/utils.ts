@@ -7,10 +7,11 @@ export function cn(...inputs: ClassValue[]) {
 
 export function formatPrice(value: number | string) {
   const amount = typeof value === "string" ? Number(value) : value;
-  return new Intl.NumberFormat("ru-RU", {
+  return new Intl.NumberFormat("ru-BY", {
     style: "currency",
-    currency: "RUB",
-    maximumFractionDigits: 0,
+    currency: "BYN",
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
   }).format(amount);
 }
 

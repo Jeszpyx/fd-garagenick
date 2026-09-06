@@ -2,13 +2,14 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { CalendarDays, LayoutGrid, LogOut } from "lucide-react";
+import { CalendarDays, LayoutGrid, LogOut, Tags } from "lucide-react";
 import { clearAdminToken, getAdminToken } from "@/lib/api/admin-client";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 
 const links = [
   { href: "/admin/products", label: "Товары", icon: LayoutGrid },
+  { href: "/admin/categories", label: "Категории", icon: Tags },
   { href: "/admin/menu", label: "Календарь", icon: CalendarDays },
 ];
 

@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ChevronLeft, ChevronRight, Copy, Plus, X } from "lucide-react";
 import { toast } from "sonner";
-import { adminFetch } from "@/lib/api/admin-client";
+import { adminFetch, clearAdminToken } from "@/lib/api/admin-client";
 import type { MenuItem, Product } from "@/types";
 import {
   addDaysToDateKey,
@@ -55,10 +55,13 @@ export function MenuCalendar() {
     ]);
 
     if (
+      menuResult.status === 401 ||
+      productsResult.status === 401 ||
       menuResult.error === "Unauthorized" ||
       productsResult.error === "Unauthorized"
     ) {
-      router.push("/admin/login");
+      clearAdminToken();
+      router.replace("/admin/login");
       return;
     }
 

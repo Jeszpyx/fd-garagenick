@@ -1,10 +1,10 @@
-import { NextRequest } from "next/server";
+import { MOCK_OTP_CODE } from "@/lib/auth/otp-constants";
 import { createOtpCode, saveOtp } from "@/lib/auth/otp-store";
 import { apiError, apiSuccess } from "@/lib/api/response";
 import { normalizePhone } from "@/lib/utils";
 import { phoneSchema } from "@/lib/validations";
 
-export async function POST(request: NextRequest) {
+export async function POST(request: Request) {
   try {
     const body = await request.json();
     const parsed = phoneSchema.safeParse(body);
@@ -17,14 +17,13 @@ export async function POST(request: NextRequest) {
     const code = createOtpCode();
     saveOtp(phone, code);
 
-    if (process.env.NODE_ENV === "development") {
-      console.log(`[OTP] ${phone}: ${code}`);
-    }
+    console.log(`[OTP mock] ${phone}: ${code}`);
 
     return apiSuccess({
       success: true,
-      message: "Код отправлен",
-      devCode: process.env.NODE_ENV === "development" ? code : undefined,
+      message: "Код отправлен (заглушка SMS)",
+      // Пока SMS не подключены — всегда отдаём код клиенту.
+      mockCode: MOCK_OTP_CODE,
     });
   } catch {
     return apiError("Не удалось отправить код", 500);

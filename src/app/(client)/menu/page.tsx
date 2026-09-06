@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { ProductCard } from "@/components/product-card";
+import { DayMenuCard } from "@/components/day-menu-card";
 import { DateTabs } from "@/components/date-tabs";
 import type { MenuItem } from "@/types";
 import { addDaysToDateKey, formatDateLabel, todayDateKey } from "@/lib/utils";
@@ -27,7 +27,7 @@ export default function MenuPage() {
       setDatesWithMenu(new Set(rangeItems.map((item) => item.date)));
     }
 
-    loadRange();
+    void loadRange();
   }, [dates]);
 
   useEffect(() => {
@@ -39,16 +39,24 @@ export default function MenuPage() {
       setLoading(false);
     }
 
-    loadMenu();
+    void loadMenu();
   }, [selectedDate]);
 
+  const products = items.map((item) => item.product);
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 px-4 pt-4 sm:px-6 sm:pt-6">
       <div>
-        <p className="text-sm text-muted-foreground">Меню по датам</p>
-        <h1 className="text-2xl font-bold capitalize sm:text-3xl">
+        <p className="text-sm font-medium text-[oklch(0.45_0.08_155)]">
+          Заказ по дням
+        </p>
+        <h1 className="font-display text-3xl font-semibold capitalize tracking-tight sm:text-4xl">
           {formatDateLabel(selectedDate)}
         </h1>
+        <p className="mt-2 max-w-xl text-sm text-muted-foreground">
+          Выберите дату и добавьте день в корзину. Состав блюд задаётся на
+          кухне.
+        </p>
       </div>
 
       <DateTabs
@@ -59,19 +67,15 @@ export default function MenuPage() {
       />
 
       {loading ? (
-        <div className="glass-panel rounded-2xl p-8 text-center text-muted-foreground">
+        <div className="site-surface rounded-3xl p-8 text-center text-muted-foreground">
           Загрузка меню...
         </div>
-      ) : items.length === 0 ? (
-        <div className="glass-panel rounded-2xl p-8 text-center text-muted-foreground">
-          На эту дату блюда не назначены.
+      ) : products.length === 0 ? (
+        <div className="site-surface rounded-3xl p-8 text-center text-muted-foreground">
+          На эту дату меню ещё не назначено.
         </div>
       ) : (
-        <div className="grid grid-cols-1 gap-4 min-[480px]:grid-cols-2 lg:grid-cols-3 lg:gap-5">
-          {items.map((item, index) => (
-            <ProductCard key={item.id} product={item.product} index={index} />
-          ))}
-        </div>
+        <DayMenuCard date={selectedDate} products={products} />
       )}
     </div>
   );

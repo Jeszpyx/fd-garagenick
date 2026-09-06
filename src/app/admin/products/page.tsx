@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
-import { adminFetch } from "@/lib/api/admin-client";
+import { adminFetch, clearAdminToken } from "@/lib/api/admin-client";
 import type { Product } from "@/types";
 import { formatPrice } from "@/lib/utils";
 import { ProductForm } from "@/components/admin/product-form";
@@ -24,11 +24,12 @@ export default function AdminProductsPage() {
     }
 
     const result = await adminFetch<Product[]>("/api/admin/products");
+    if (result.status === 401 || result.error === "Unauthorized") {
+      clearAdminToken();
+      router.replace("/admin/login");
+      return;
+    }
     if (result.error) {
-      if (result.error === "Unauthorized") {
-        router.push("/admin/login");
-        return;
-      }
       toast.error(result.error);
     } else {
       setProducts(result.data ?? []);
@@ -110,6 +111,10 @@ export default function AdminProductsPage() {
                     <p className="text-sm text-muted-foreground">
                       {product.category ?? "Без категории"} ·{" "}
                       {formatPrice(product.price)}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {product.calories} ккал · Б {product.proteins} · Ж{" "}
+                      {product.fats} · У {product.carbs}
                     </p>
                   </div>
                 </div>

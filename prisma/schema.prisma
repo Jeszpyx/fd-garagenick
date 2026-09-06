@@ -18,14 +18,29 @@ model User {
   @@index([phone])
 }
 
+model Category {
+  id        String    @id @default(cuid())
+  name      String    @unique
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  products  Product[]
+
+  @@index([name])
+}
+
 model Product {
   id            String         @id @default(cuid())
   name          String
   description   String?
   price         Decimal        @db.Decimal(10, 2)
+  calories      Int            @default(0)
+  proteins      Decimal        @db.Decimal(8, 1) @default(0)
+  fats          Decimal        @db.Decimal(8, 1) @default(0)
+  carbs         Decimal        @db.Decimal(8, 1) @default(0)
   imageData     Bytes?
   imageMimeType String?
-  category      String?
+  categoryId    String?
+  category      Category?      @relation(fields: [categoryId], references: [id], onDelete: SetNull)
   isActive      Boolean        @default(true)
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
@@ -33,7 +48,7 @@ model Product {
   orderItems    OrderItem[]
 
   @@index([isActive])
-  @@index([category])
+  @@index([categoryId])
 }
 
 model MenuSchedule {

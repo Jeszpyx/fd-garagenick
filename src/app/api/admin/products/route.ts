@@ -5,6 +5,11 @@ import { serializeProduct } from "@/lib/services/catalog";
 import { apiError, apiSuccess } from "@/lib/api/response";
 import { parseProductForm, readUploadedImage } from "@/lib/product-image";
 
+const productQuery = {
+  omit: { imageData: true } as const,
+  include: { category: { select: { id: true, name: true } } },
+};
+
 export async function GET(request: NextRequest) {
   const admin = await requireAdmin(request);
   if (!admin) {
@@ -13,7 +18,7 @@ export async function GET(request: NextRequest) {
 
   try {
     const products = await prisma.product.findMany({
-      omit: { imageData: true },
+      ...productQuery,
       orderBy: [{ createdAt: "desc" }],
     });
 
@@ -37,19 +42,29 @@ export async function POST(request: NextRequest) {
       return apiError(parsed.error.issues[0]?.message ?? "Invalid product", 400);
     }
 
+    const categoryId = parsed.data.categoryId;
+    const exists = await prisma.category.findUnique({ where: { id: categoryId } });
+    if (!exists) {
+      return apiError("Категория не найдена", 400);
+    }
+
     const image = await readUploadedImage(imageFile);
 
     const product = await prisma.product.create({
       data: {
         name: parsed.data.name,
-        description: parsed.data.description ?? null,
+        description: parsed.data.description,
         price: parsed.data.price,
-        category: parsed.data.category ?? null,
+        calories: parsed.data.calories,
+        proteins: parsed.data.proteins,
+        fats: parsed.data.fats,
+        carbs: parsed.data.carbs,
+        categoryId,
         isActive: parsed.data.isActive ?? true,
         imageData: image?.imageData,
         imageMimeType: image?.imageMimeType,
       },
-      omit: { imageData: true },
+      ...productQuery,
     });
 
     return apiSuccess(serializeProduct(product), 201);

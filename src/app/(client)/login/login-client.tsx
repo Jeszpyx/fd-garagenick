@@ -1,8 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
+import { ensureUserSession } from "@/lib/api/user-client";
+import { MOCK_OTP_CODE } from "@/lib/auth/otp-constants";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -20,13 +22,27 @@ export default function LoginPageClient() {
   const redirect = searchParams.get("redirect") ?? "/";
 
   const [localPhone, setLocalPhone] = useState("");
-  const [code, setCode] = useState("");
+  const [code, setCode] = useState(MOCK_OTP_CODE);
   const [name, setName] = useState("");
   const [step, setStep] = useState<"phone" | "code">("phone");
   const [loading, setLoading] = useState(false);
+  const [checkingSession, setCheckingSession] = useState(true);
 
   const phone = normalizePhone(localPhone);
   const phoneReady = isBelarusMobile(phone);
+
+  useEffect(() => {
+    async function restoreSession() {
+      const ok = await ensureUserSession();
+      if (ok) {
+        router.replace(redirect);
+        return;
+      }
+      setCheckingSession(false);
+    }
+
+    void restoreSession();
+  }, [redirect, router]);
 
   function handlePhoneChange(value: string) {
     setLocalPhone(getBelarusLocalDigits(value));
@@ -47,11 +63,9 @@ export default function LoginPageClient() {
         return;
       }
 
-      if (json.data?.devCode) {
-        toast.message(`Dev OTP: ${json.data.devCode}`);
-      }
-
-      toast.success("Код отправлен");
+      const mockCode = json.data?.mockCode ?? MOCK_OTP_CODE;
+      setCode(mockCode);
+      toast.success(`Код (заглушка): ${mockCode}`);
       setStep("code");
     } catch {
       toast.error("Ошибка сети");
@@ -66,6 +80,7 @@ export default function LoginPageClient() {
       const response = await fetch("/api/auth/verify-otp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({
           phone,
           code,
@@ -89,13 +104,33 @@ export default function LoginPageClient() {
     }
   }
 
+  if (checkingSession) {
+    return (
+      <div className="mx-auto max-w-md px-4 pt-6 sm:px-6">
+        <Card className="site-surface border-0 shadow-none">
+          <CardContent className="p-6 text-center text-sm text-muted-foreground">
+            Проверяем сохранённый вход…
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   return (
-    <div className="mx-auto max-w-md">
-      <Card>
+    <div className="mx-auto max-w-md px-4 pt-6 sm:px-6">
+      <Card className="site-surface border-0 shadow-none">
         <CardHeader>
-          <CardTitle>Вход по телефону РБ</CardTitle>
+          <CardTitle className="font-display text-2xl font-semibold">
+            Вход по телефону РБ
+          </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
+          <p className="rounded-xl bg-muted/60 px-3 py-2 text-xs text-muted-foreground">
+            SMS пока заглушка: код всегда <strong>{MOCK_OTP_CODE}</strong>.
+            После входа сессия хранится (access + refresh), повторный SMS не
+            нужен.
+          </p>
+
           {step === "phone" ? (
             <>
               <div className="space-y-2">
@@ -128,13 +163,13 @@ export default function LoginPageClient() {
           ) : (
             <>
               <p className="text-sm text-muted-foreground">
-                Код отправлен на {phone}
+                Код для {phone}: <strong>{MOCK_OTP_CODE}</strong>
               </p>
               <div className="space-y-2">
                 <Label htmlFor="code">Код из SMS</Label>
                 <Input
                   id="code"
-                  placeholder="1234"
+                  placeholder={MOCK_OTP_CODE}
                   maxLength={4}
                   inputMode="numeric"
                   value={code}

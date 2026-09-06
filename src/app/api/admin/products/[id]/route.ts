@@ -9,6 +9,11 @@ type RouteContext = {
   params: Promise<{ id: string }>;
 };
 
+const productQuery = {
+  omit: { imageData: true } as const,
+  include: { category: { select: { id: true, name: true } } },
+};
+
 export async function PUT(request: NextRequest, context: RouteContext) {
   const admin = await requireAdmin(request);
   if (!admin) {
@@ -24,15 +29,25 @@ export async function PUT(request: NextRequest, context: RouteContext) {
       return apiError(parsed.error.issues[0]?.message ?? "Invalid product", 400);
     }
 
+    const categoryId = parsed.data.categoryId;
+    const exists = await prisma.category.findUnique({ where: { id: categoryId } });
+    if (!exists) {
+      return apiError("Категория не найдена", 400);
+    }
+
     const image = await readUploadedImage(imageFile);
 
     const product = await prisma.product.update({
       where: { id },
       data: {
         name: parsed.data.name,
-        description: parsed.data.description ?? null,
+        description: parsed.data.description,
         price: parsed.data.price,
-        category: parsed.data.category ?? null,
+        calories: parsed.data.calories,
+        proteins: parsed.data.proteins,
+        fats: parsed.data.fats,
+        carbs: parsed.data.carbs,
+        categoryId,
         isActive: parsed.data.isActive ?? true,
         ...(image
           ? {
@@ -43,7 +58,7 @@ export async function PUT(request: NextRequest, context: RouteContext) {
             ? { imageData: null, imageMimeType: null }
             : {}),
       },
-      omit: { imageData: true },
+      ...productQuery,
     });
 
     return apiSuccess(serializeProduct(product));

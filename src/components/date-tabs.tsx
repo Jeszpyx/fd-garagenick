@@ -29,10 +29,10 @@ export function DateTabs({
             type="button"
             onClick={() => onSelect(date)}
             className={cn(
-              "relative shrink-0 snap-start rounded-2xl px-3 py-2 text-left transition sm:px-4",
+              "relative shrink-0 snap-start rounded-2xl px-3 py-2.5 text-left transition sm:px-4",
               selected
-                ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20"
-                : "bg-secondary text-secondary-foreground hover:bg-accent",
+                ? "bg-primary text-primary-foreground"
+                : "site-surface text-secondary-foreground hover:bg-accent",
             )}
           >
             <span className="block text-[11px] uppercase opacity-80">

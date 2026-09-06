@@ -1,9 +1,19 @@
+export type Category = {
+  id: string;
+  name: string;
+};
+
 export type Product = {
   id: string;
   name: string;
   description: string | null;
   price: number;
+  calories: number;
+  proteins: number;
+  fats: number;
+  carbs: number;
   imageUrl: string | null;
+  categoryId: string | null;
   category: string | null;
   isActive: boolean;
 };

@@ -5,9 +5,9 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Minus, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
+import { ensureUserSession } from "@/lib/api/user-client";
 import { useCartStore } from "@/store/cart";
 import { formatPrice } from "@/lib/utils";
-import { ProductImage } from "@/components/product-image";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 
@@ -24,8 +24,8 @@ export default function CartPage() {
     setSubmitting(true);
 
     try {
-      const meResponse = await fetch("/api/auth/me");
-      if (!meResponse.ok) {
+      const signedIn = await ensureUserSession();
+      if (!signedIn) {
         toast.error("Войдите по номеру телефона, чтобы оформить заказ");
         router.push("/login?redirect=/cart");
         return;
@@ -36,7 +36,7 @@ export default function CartPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           items: items.map((item) => ({
-            productId: item.productId,
+            date: item.date,
             quantity: item.quantity,
           })),
         }),
@@ -61,48 +61,42 @@ export default function CartPage() {
 
   if (items.length === 0) {
     return (
-      <div className="glass-panel mx-auto max-w-xl rounded-2xl p-6 text-center sm:rounded-3xl sm:p-10">
-        <h1 className="text-2xl font-semibold">Корзина пуста</h1>
-        <p className="mt-2 text-muted-foreground">
-          Добавьте блюда из меню или каталога.
-        </p>
-        <Button className="mt-6 w-full sm:w-auto" onClick={() => router.push("/catalog")}>
-          Перейти в каталог
-        </Button>
+      <div className="px-4 pt-6 sm:px-6">
+        <div className="site-surface mx-auto max-w-xl rounded-3xl p-6 text-center sm:p-10">
+          <h1 className="font-display text-2xl font-semibold">Корзина пуста</h1>
+          <p className="mt-2 text-muted-foreground">
+            Добавьте дни меню — состав каждого дня задан на кухне.
+          </p>
+          <Button className="mt-6 w-full sm:w-auto" onClick={() => router.push("/menu")}>
+            Перейти к меню
+          </Button>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="mx-auto grid max-w-5xl gap-6 lg:grid-cols-[1.4fr_0.8fr]">
+    <div className="mx-auto grid max-w-5xl gap-6 px-4 pt-4 sm:px-6 sm:pt-6 lg:grid-cols-[1.4fr_0.8fr]">
       <div className="space-y-4">
-        <h1 className="text-2xl font-bold sm:text-3xl">Корзина</h1>
+        <h1 className="font-display text-3xl font-semibold tracking-tight">Корзина</h1>
         {items.map((item) => (
-          <Card key={item.productId} className="overflow-hidden">
+          <Card key={item.date} className="overflow-hidden">
             <CardContent className="flex flex-col gap-3 p-3 sm:flex-row sm:items-center sm:gap-4 sm:p-4">
-              <div className="flex min-w-0 items-center gap-3">
-                <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-2xl bg-muted sm:h-20 sm:w-20">
-                  <ProductImage
-                    src={item.imageUrl}
-                    alt={item.name}
-                    sizes="80px"
-                  />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <h3 className="truncate font-semibold">{item.name}</h3>
-                  <p className="text-sm text-muted-foreground">
-                    {formatPrice(item.price)}
-                  </p>
-                </div>
+              <div className="min-w-0 flex-1">
+                <h3 className="font-semibold capitalize">{item.label}</h3>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  {item.productNames.join(", ")}
+                </p>
+                <p className="mt-1 text-sm font-medium text-primary">
+                  {formatPrice(item.price)} / день
+                </p>
               </div>
               <div className="flex items-center justify-between gap-2 sm:justify-end">
                 <div className="flex items-center gap-2">
                   <Button
                     variant="outline"
                     size="icon"
-                    onClick={() =>
-                      updateQuantity(item.productId, item.quantity - 1)
-                    }
+                    onClick={() => updateQuantity(item.date, item.quantity - 1)}
                   >
                     <Minus className="h-4 w-4" />
                   </Button>
@@ -112,9 +106,7 @@ export default function CartPage() {
                   <Button
                     variant="outline"
                     size="icon"
-                    onClick={() =>
-                      updateQuantity(item.productId, item.quantity + 1)
-                    }
+                    onClick={() => updateQuantity(item.date, item.quantity + 1)}
                   >
                     <Plus className="h-4 w-4" />
                   </Button>
@@ -122,7 +114,7 @@ export default function CartPage() {
                 <Button
                   variant="ghost"
                   size="icon"
-                  onClick={() => removeItem(item.productId)}
+                  onClick={() => removeItem(item.date)}
                 >
                   <Trash2 className="h-4 w-4" />
                 </Button>
@@ -148,10 +140,10 @@ export default function CartPage() {
           {submitting ? "Оформляем..." : "Оформить заказ"}
         </Button>
         <Link
-          href="/catalog"
+          href="/menu"
           className="mt-3 block text-center text-sm text-primary"
         >
-          Продолжить покупки
+          Выбрать другие дни
         </Link>
       </Card>
     </div>

@@ -3,7 +3,7 @@ import { requireUserSession } from "@/lib/auth/user-session";
 import { prisma } from "@/lib/prisma";
 import { apiError, apiSuccess } from "@/lib/api/response";
 import { createOrderSchema } from "@/lib/validations";
-import { serializeProduct } from "@/lib/services/catalog";
+import { getMenuForDate, serializeProduct } from "@/lib/services/catalog";
 
 export async function POST(request: NextRequest) {
   try {
@@ -15,33 +15,47 @@ export async function POST(request: NextRequest) {
       return apiError(parsed.error.issues[0]?.message ?? "Invalid order", 400);
     }
 
-    const productIds = parsed.data.items.map((item) => item.productId);
-    const products = await prisma.product.findMany({
-      omit: { imageData: true },
-      where: {
-        id: { in: productIds },
-        isActive: true,
-      },
-    });
-
-    if (products.length !== productIds.length) {
-      return apiError("Некоторые товары недоступны", 400);
+    const dayQuantities = new Map<string, number>();
+    for (const item of parsed.data.items) {
+      dayQuantities.set(
+        item.date,
+        (dayQuantities.get(item.date) ?? 0) + item.quantity,
+      );
     }
 
-    const productMap = new Map(products.map((product) => [product.id, product]));
-
+    const productTotals = new Map<
+      string,
+      { quantity: number; price: number }
+    >();
     let total = 0;
-    const orderItems = parsed.data.items.map((item) => {
-      const product = productMap.get(item.productId)!;
-      const price = Number(product.price);
-      total += price * item.quantity;
 
-      return {
-        productId: product.id,
-        quantity: item.quantity,
+    for (const [date, dayQty] of dayQuantities) {
+      const menuItems = await getMenuForDate(date);
+      if (menuItems.length === 0) {
+        return apiError(`На ${date} меню не назначено`, 400);
+      }
+
+      for (const menuItem of menuItems) {
+        const price = menuItem.product.price;
+        const quantity = dayQty;
+        total += price * quantity;
+
+        const existing = productTotals.get(menuItem.product.id);
+        if (existing) {
+          existing.quantity += quantity;
+        } else {
+          productTotals.set(menuItem.product.id, { quantity, price });
+        }
+      }
+    }
+
+    const orderItems = Array.from(productTotals.entries()).map(
+      ([productId, { quantity, price }]) => ({
+        productId,
+        quantity,
         price,
-      };
-    });
+      }),
+    );
 
     const order = await prisma.order.create({
       data: {

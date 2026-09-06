@@ -23,9 +23,13 @@ export const adminLoginSchema = z.object({
 
 export const productSchema = z.object({
   name: z.string().trim().min(2).max(120),
-  description: z.string().trim().max(500).optional().nullable(),
+  description: z.string().trim().min(1).max(500),
   price: z.coerce.number().positive(),
-  category: z.string().trim().max(60).optional().nullable(),
+  calories: z.coerce.number().int().nonnegative(),
+  proteins: z.coerce.number().nonnegative(),
+  fats: z.coerce.number().nonnegative(),
+  carbs: z.coerce.number().nonnegative(),
+  categoryId: z.string().trim().min(1, "Выберите категорию"),
   isActive: z
     .union([z.boolean(), z.string()])
     .optional()
@@ -34,6 +38,10 @@ export const productSchema = z.object({
       if (typeof value === "boolean") return value;
       return value === "true" || value === "on" || value === "1";
     }),
+});
+
+export const categorySchema = z.object({
+  name: z.string().trim().min(2).max(60),
 });
 
 const dateKeySchema = z
@@ -51,7 +59,7 @@ export const menuCopySchema = z.object({
 });
 
 export const orderItemSchema = z.object({
-  productId: z.string().min(1),
+  date: dateKeySchema,
   quantity: z.coerce.number().int().positive(),
 });
 
@@ -60,5 +68,6 @@ export const createOrderSchema = z.object({
 });
 
 export type ProductInput = z.infer<typeof productSchema>;
+export type CategoryInput = z.infer<typeof categorySchema>;
 export type MenuScheduleInput = z.infer<typeof menuScheduleSchema>;
 export type CreateOrderInput = z.infer<typeof createOrderSchema>;

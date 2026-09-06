@@ -4,18 +4,21 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
 export type CartItem = {
-  productId: string;
-  name: string;
+  date: string;
+  label: string;
   price: number;
   quantity: number;
-  imageUrl?: string | null;
+  productNames: string[];
 };
 
 type CartState = {
   items: CartItem[];
-  addItem: (item: Omit<CartItem, "quantity">, quantity?: number) => void;
-  removeItem: (productId: string) => void;
-  updateQuantity: (productId: string, quantity: number) => void;
+  addDay: (
+    item: Omit<CartItem, "quantity">,
+    quantity?: number,
+  ) => void;
+  removeItem: (date: string) => void;
+  updateQuantity: (date: string, quantity: number) => void;
   clearCart: () => void;
   totalItems: () => number;
   totalPrice: () => number;
@@ -25,18 +28,19 @@ export const useCartStore = create<CartState>()(
   persist(
     (set, get) => ({
       items: [],
-      addItem: (item, quantity = 1) => {
+      addDay: (item, quantity = 1) => {
         set((state) => {
           const existing = state.items.find(
-            (cartItem) => cartItem.productId === item.productId,
+            (cartItem) => cartItem.date === item.date,
           );
 
           if (existing) {
             return {
               items: state.items.map((cartItem) =>
-                cartItem.productId === item.productId
+                cartItem.date === item.date
                   ? {
                       ...cartItem,
+                      ...item,
                       quantity: cartItem.quantity + quantity,
                     }
                   : cartItem,
@@ -49,20 +53,20 @@ export const useCartStore = create<CartState>()(
           };
         });
       },
-      removeItem: (productId) => {
+      removeItem: (date) => {
         set((state) => ({
-          items: state.items.filter((item) => item.productId !== productId),
+          items: state.items.filter((item) => item.date !== date),
         }));
       },
-      updateQuantity: (productId, quantity) => {
+      updateQuantity: (date, quantity) => {
         if (quantity <= 0) {
-          get().removeItem(productId);
+          get().removeItem(date);
           return;
         }
 
         set((state) => ({
           items: state.items.map((item) =>
-            item.productId === productId ? { ...item, quantity } : item,
+            item.date === date ? { ...item, quantity } : item,
           ),
         }));
       },
@@ -76,7 +80,7 @@ export const useCartStore = create<CartState>()(
         ),
     }),
     {
-      name: "food-delivery-cart",
+      name: "food-delivery-cart-v2",
     },
   ),
 );
