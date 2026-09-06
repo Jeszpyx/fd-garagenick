@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ChevronLeft, ChevronRight, Copy, Plus, X } from "lucide-react";
 import { toast } from "sonner";
@@ -18,6 +18,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
+type ProductOption = Pick<Product, "id" | "name" | "price" | "isActive">;
+
 export function MenuCalendar() {
   const router = useRouter();
   const today = todayDateKey();
@@ -26,7 +28,7 @@ export function MenuCalendar() {
     return { year: now.getFullYear(), month: now.getMonth() };
   });
   const [menu, setMenu] = useState<MenuItem[]>([]);
-  const [products, setProducts] = useState<Product[]>([]);
+  const [products, setProducts] = useState<ProductOption[]>([]);
   const [selectedDate, setSelectedDate] = useState(today);
   const [selectedProductId, setSelectedProductId] = useState("");
   const [copyToDate, setCopyToDate] = useState(addDaysToDateKey(today, 1));
@@ -41,45 +43,72 @@ export function MenuCalendar() {
   const rangeFrom = cells[0]?.dateKey ?? today;
   const rangeTo = cells[cells.length - 1]?.dateKey ?? today;
 
-  async function loadData(
-    from = rangeFrom,
-    to = rangeTo,
-    options: { silent?: boolean } = {},
-  ) {
-    if (!options.silent) {
-      setLoading(true);
-    }
-    const [menuResult, productsResult] = await Promise.all([
-      adminFetch<{ items: MenuItem[] }>(`/api/admin/menu?from=${from}&to=${to}`),
-      adminFetch<Product[]>("/api/admin/products"),
-    ]);
-
-    if (
-      menuResult.status === 401 ||
-      productsResult.status === 401 ||
-      menuResult.error === "Unauthorized" ||
-      productsResult.error === "Unauthorized"
-    ) {
-      clearAdminToken();
-      router.replace("/admin/login");
-      return;
-    }
-
-    if (menuResult.error || productsResult.error) {
-      toast.error(menuResult.error ?? productsResult.error ?? "Ошибка загрузки");
-      setLoading(false);
-      return;
-    }
-
-    setMenu(menuResult.data?.items ?? []);
-    setProducts(productsResult.data ?? []);
-    setLoading(false);
-  }
+  const handleUnauthorized = useCallback(() => {
+    clearAdminToken();
+    router.replace("/admin/login");
+  }, [router]);
 
   useEffect(() => {
-    loadData(rangeFrom, rangeTo);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [rangeFrom, rangeTo]);
+    let cancelled = false;
+
+    async function loadProducts() {
+      const productsResult = await adminFetch<ProductOption[]>(
+        "/api/admin/products?lite=1",
+      );
+      if (cancelled) return;
+
+      if (
+        productsResult.status === 401 ||
+        productsResult.error === "Unauthorized"
+      ) {
+        handleUnauthorized();
+        return;
+      }
+
+      if (productsResult.error) {
+        toast.error(productsResult.error);
+        return;
+      }
+
+      setProducts(productsResult.data ?? []);
+    }
+
+    void loadProducts();
+    return () => {
+      cancelled = true;
+    };
+  }, [handleUnauthorized]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadMenu() {
+      setLoading(true);
+      const menuResult = await adminFetch<{ items: MenuItem[] }>(
+        `/api/admin/menu?from=${rangeFrom}&to=${rangeTo}`,
+      );
+      if (cancelled) return;
+
+      if (menuResult.status === 401 || menuResult.error === "Unauthorized") {
+        handleUnauthorized();
+        return;
+      }
+
+      if (menuResult.error) {
+        toast.error(menuResult.error);
+        setLoading(false);
+        return;
+      }
+
+      setMenu(menuResult.data?.items ?? []);
+      setLoading(false);
+    }
+
+    void loadMenu();
+    return () => {
+      cancelled = true;
+    };
+  }, [rangeFrom, rangeTo, handleUnauthorized]);
 
   const menuByDate = useMemo(() => {
     const grouped = new Map<string, MenuItem[]>();
@@ -92,10 +121,19 @@ export function MenuCalendar() {
   }, [menu]);
 
   const selectedItems = menuByDate.get(selectedDate) ?? [];
-  const monthTitle = new Intl.DateTimeFormat("ru-RU", {
-    month: "long",
-    year: "numeric",
-  }).format(new Date(cursor.year, cursor.month, 1));
+  const monthTitle = useMemo(
+    () =>
+      new Intl.DateTimeFormat("ru-RU", {
+        month: "long",
+        year: "numeric",
+      }).format(new Date(cursor.year, cursor.month, 1)),
+    [cursor.year, cursor.month],
+  );
+
+  const activeProducts = useMemo(
+    () => products.filter((product) => product.isActive),
+    [products],
+  );
 
   function shiftMonth(delta: number) {
     setCursor((prev) => {
@@ -153,10 +191,13 @@ export function MenuCalendar() {
   }
 
   async function copyMenu(fromDate: string, toDate: string) {
-    const result = await adminFetch("/api/admin/menu/copy", {
-      method: "POST",
-      body: JSON.stringify({ fromDate, toDate }),
-    });
+    const result = await adminFetch<{ items?: MenuItem[] }>(
+      "/api/admin/menu/copy",
+      {
+        method: "POST",
+        body: JSON.stringify({ fromDate, toDate }),
+      },
+    );
 
     if (result.error) {
       toast.error(result.error);
@@ -164,7 +205,13 @@ export function MenuCalendar() {
     }
 
     toast.success("Вариант меню скопирован");
-    await loadData(rangeFrom, rangeTo, { silent: true });
+
+    const menuResult = await adminFetch<{ items: MenuItem[] }>(
+      `/api/admin/menu?from=${rangeFrom}&to=${rangeTo}`,
+    );
+    if (!menuResult.error) {
+      setMenu(menuResult.data?.items ?? []);
+    }
   }
 
   return (
@@ -225,7 +272,7 @@ export function MenuCalendar() {
                   <div className="flex w-full items-center justify-center gap-1 sm:justify-between">
                     <span className="text-xs font-semibold sm:text-sm">{cell.day}</span>
                     {items.length > 0 ? (
-                      <span className="rounded-full bg-primary px-1 text-[9px] text-primary-foreground sm:px-1.5 sm:text-[10px]">
+                      <span className="rounded-md bg-primary px-1 text-[9px] text-primary-foreground sm:px-1.5 sm:text-[10px]">
                         {items.length}
                       </span>
                     ) : null}
@@ -271,7 +318,7 @@ export function MenuCalendar() {
                 onChange={(event) => setSelectedProductId(event.target.value)}
               >
                 <option value="">Блюдо для этой даты</option>
-                {products.map((product) => (
+                {activeProducts.map((product) => (
                   <option key={product.id} value={product.id}>
                     {product.name} · {formatPrice(product.price)}
                   </option>

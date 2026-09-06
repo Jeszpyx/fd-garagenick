@@ -44,7 +44,12 @@ export async function POST(request: NextRequest) {
       }
     });
 
-    const items = await getMenuInRange(parsed.data.toDate, parsed.data.toDate);
+    const items = await getMenuInRange(
+      parsed.data.toDate,
+      parsed.data.toDate,
+      false,
+      "lite",
+    );
     return apiSuccess({
       fromDate: parsed.data.fromDate,
       toDate: parsed.data.toDate,

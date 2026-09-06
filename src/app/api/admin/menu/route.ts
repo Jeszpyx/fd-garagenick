@@ -27,7 +27,7 @@ export async function GET(request: NextRequest) {
     const to =
       toParam && isDateKey(toParam) ? toParam : addDaysToDateKey(from, 40);
 
-    const menu = await getMenuInRange(from, to, false);
+    const menu = await getMenuInRange(from, to, false, "lite");
     return apiSuccess({ from, to, items: menu });
   } catch {
     return apiError("Не удалось загрузить меню", 500);
@@ -50,6 +50,7 @@ export async function POST(request: NextRequest) {
 
     const product = await prisma.product.findUnique({
       where: { id: parsed.data.productId },
+      select: { id: true },
     });
 
     if (!product) {
@@ -70,7 +71,16 @@ export async function POST(request: NextRequest) {
         productId: parsed.data.productId,
         date,
       },
-      include: { product: true },
+      include: {
+        product: {
+          select: {
+            id: true,
+            name: true,
+            price: true,
+            isActive: true,
+          },
+        },
+      },
     });
 
     return apiSuccess(serializeMenuItem(item), 201);

@@ -17,6 +17,37 @@ export async function GET(request: NextRequest) {
   }
 
   try {
+    const lite = request.nextUrl.searchParams.get("lite") === "1";
+
+    if (lite) {
+      const products = await prisma.product.findMany({
+        select: {
+          id: true,
+          name: true,
+          price: true,
+          isActive: true,
+        },
+        orderBy: [{ name: "asc" }],
+      });
+
+      return apiSuccess(
+        products.map((product) => ({
+          id: product.id,
+          name: product.name,
+          price: Number(product.price),
+          isActive: product.isActive,
+          description: null,
+          calories: 0,
+          proteins: 0,
+          fats: 0,
+          carbs: 0,
+          imageUrl: null,
+          categoryId: null,
+          category: null,
+        })),
+      );
+    }
+
     const products = await prisma.product.findMany({
       ...productQuery,
       orderBy: [{ createdAt: "desc" }],

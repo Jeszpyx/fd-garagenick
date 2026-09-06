@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { CalendarDays, LayoutGrid, LogOut, Settings, Tags } from "lucide-react";
 import { clearAdminToken, getAdminToken } from "@/lib/api/admin-client";
@@ -22,9 +23,15 @@ export default function AdminLayout({
   const pathname = usePathname();
   const router = useRouter();
   const isLogin = pathname === "/admin/login";
+  const [hasToken, setHasToken] = useState(false);
+
+  useEffect(() => {
+    setHasToken(Boolean(getAdminToken()));
+  }, [pathname]);
 
   function handleLogout() {
     clearAdminToken();
+    setHasToken(false);
     router.push("/admin/login");
   }
 
@@ -34,7 +41,7 @@ export default function AdminLayout({
 
   return (
     <div className="min-h-dvh md:grid md:grid-cols-[240px_1fr] lg:grid-cols-[260px_1fr]">
-      <aside className="border-b border-border/60 bg-background/80 p-3 backdrop-blur-xl md:min-h-dvh md:border-b-0 md:border-r md:p-4">
+      <aside className="border-b border-border bg-background p-3 md:min-h-dvh md:border-b-0 md:border-r md:p-4">
         <div className="mb-3 flex items-center justify-between gap-3 md:mb-8 md:block">
           <div>
             <p className="text-xs text-muted-foreground md:text-sm">Admin</p>
@@ -71,7 +78,7 @@ export default function AdminLayout({
           variant="outline"
           className="mt-6 hidden w-full md:inline-flex"
           onClick={handleLogout}
-          disabled={!getAdminToken()}
+          disabled={!hasToken}
         >
           <LogOut className="h-4 w-4" />
           Выйти

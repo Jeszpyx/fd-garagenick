@@ -101,7 +101,7 @@ export default function AdminSettingsPage() {
 
   if (loading) {
     return (
-      <div className="glass-panel rounded-2xl p-8 text-center text-muted-foreground">
+      <div className="rounded-2xl border border-border bg-card p-8 text-center text-muted-foreground">
         Загрузка настроек...
       </div>
     );

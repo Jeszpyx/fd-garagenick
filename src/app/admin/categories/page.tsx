@@ -111,11 +111,11 @@ export default function AdminCategoriesPage() {
       </Card>
 
       {loading ? (
-        <div className="glass-panel rounded-2xl p-8 text-center text-muted-foreground">
+        <div className="rounded-2xl border border-border bg-card p-8 text-center text-muted-foreground">
           Загрузка...
         </div>
       ) : categories.length === 0 ? (
-        <div className="glass-panel rounded-2xl p-8 text-center text-muted-foreground">
+        <div className="rounded-2xl border border-border bg-card p-8 text-center text-muted-foreground">
           Категорий пока нет — добавьте первую.
         </div>
       ) : (

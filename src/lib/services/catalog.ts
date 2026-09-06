@@ -7,10 +7,18 @@ const productQuery = {
   include: { category: { select: { id: true, name: true } } },
 } as const;
 
+/** Лёгкий select для админ-календаря — только поля для списка. */
+const productLiteSelect = {
+  id: true,
+  name: true,
+  price: true,
+  isActive: true,
+} as const;
+
 export function serializeProduct(product: {
   id: string;
   name: string;
-  description: string | null;
+  description?: string | null;
   price: { toString(): string } | number | string;
   calories?: number | null;
   proteins?: { toString(): string } | number | string | null;
@@ -30,7 +38,7 @@ export function serializeProduct(product: {
   return {
     id: product.id,
     name: product.name,
-    description: product.description,
+    description: product.description ?? null,
     price: Number(product.price),
     calories: Number(product.calories ?? 0),
     proteins: Number(product.proteins ?? 0),
@@ -100,6 +108,7 @@ export async function getMenuInRange(
   fromDate: string,
   toDate: string,
   activeOnly = true,
+  mode: "full" | "lite" = "full",
 ) {
   const items = await prisma.menuSchedule.findMany({
     where: {
@@ -110,7 +119,7 @@ export async function getMenuInRange(
       ...(activeOnly ? { product: { isActive: true } } : {}),
     },
     include: {
-      product: productQuery,
+      product: mode === "lite" ? { select: productLiteSelect } : productQuery,
     },
     orderBy: [{ date: "asc" }, { createdAt: "asc" }],
   });

@@ -42,6 +42,7 @@ export async function adminFetch<T>(
   const token = getAdminToken();
 
   const response = await fetch(path, {
+    cache: "no-store",
     ...options,
     headers: {
       ...(options.body instanceof FormData

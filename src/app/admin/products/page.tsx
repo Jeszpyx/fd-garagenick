@@ -93,12 +93,17 @@ export default function AdminProductsPage() {
               <div
                 key={product.id}
                 className="flex flex-col gap-3 rounded-2xl border border-border/70 p-4 md:flex-row md:items-center md:justify-between"
+                style={{ contentVisibility: "auto", containIntrinsicSize: "0 96px" }}
               >
                 <div className="flex min-w-0 items-center gap-3">
                   {product.imageUrl ? (
                     <img
                       src={product.imageUrl}
                       alt={product.name}
+                      width={56}
+                      height={56}
+                      loading="lazy"
+                      decoding="async"
                       className="h-14 w-14 rounded-xl object-cover"
                     />
                   ) : (

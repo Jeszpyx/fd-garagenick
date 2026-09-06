@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { adminFetch } from "@/lib/api/admin-client";
+import { compressImageFile } from "@/lib/compress-image";
 import type { Category, Product } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -109,7 +110,11 @@ export function ProductForm({ editing, onSuccess, onCancel }: ProductFormProps) 
     payload.append("categoryId", form.categoryId);
     payload.append("isActive", String(form.isActive));
     if (file) {
-      payload.append("image", file);
+      try {
+        payload.append("image", await compressImageFile(file));
+      } catch {
+        payload.append("image", file);
+      }
     }
     if (removeImage) {
       payload.append("removeImage", "true");
