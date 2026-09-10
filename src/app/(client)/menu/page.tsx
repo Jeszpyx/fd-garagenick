@@ -45,15 +45,15 @@ export default function MenuPage() {
   const products = items.map((item) => item.product);
 
   return (
-    <div className="mx-auto max-w-6xl space-y-6 px-4 pt-4 sm:px-6 sm:pt-6">
-      <div>
+    <div className="site-shell space-y-6 py-4 sm:py-6 lg:py-8">
+      <div className="max-w-3xl">
         <p className="text-sm font-medium text-[oklch(0.45_0.08_155)]">
           Заказ по дням
         </p>
-        <h1 className="font-display text-3xl font-semibold capitalize tracking-tight sm:text-4xl">
+        <h1 className="font-display text-3xl font-semibold capitalize tracking-tight sm:text-4xl lg:text-5xl">
           {formatDateLabel(selectedDate)}
         </h1>
-        <p className="mt-2 max-w-xl text-sm text-muted-foreground">
+        <p className="mt-2 text-sm text-muted-foreground sm:text-base">
           Выберите дату и добавьте день в корзину. Состав блюд задаётся на
           кухне.
         </p>
@@ -67,11 +67,11 @@ export default function MenuPage() {
       />
 
       {loading ? (
-        <div className="site-surface rounded-3xl p-8 text-center text-muted-foreground">
+        <div className="site-surface rounded-3xl p-8 text-center text-muted-foreground sm:p-12">
           Загрузка меню...
         </div>
       ) : products.length === 0 ? (
-        <div className="site-surface rounded-3xl p-8 text-center text-muted-foreground">
+        <div className="site-surface rounded-3xl p-8 text-center text-muted-foreground sm:p-12">
           На эту дату меню ещё не назначено.
         </div>
       ) : (

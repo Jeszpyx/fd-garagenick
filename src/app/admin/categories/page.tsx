@@ -143,11 +143,11 @@ export default function AdminCategoriesPage() {
           Категорий пока нет — добавьте первую.
         </div>
       ) : (
-        <div className="space-y-2">
+        <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
           {categories.map((category) => (
             <Card key={category.id}>
               <CardContent className="flex items-center justify-between gap-3 p-4">
-                <p className="font-medium">{category.name}</p>
+                <p className="min-w-0 truncate font-medium">{category.name}</p>
                 <Button
                   variant="ghost"
                   size="icon"

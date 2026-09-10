@@ -58,6 +58,20 @@ type SeedProduct = {
 const img = (id: string) =>
   `https://images.unsplash.com/${id}?auto=format&fit=crop&w=800&q=80`;
 
+const gramsRangeByCategory: Record<(typeof categoryNames)[number], [number, number]> = {
+  Супы: [250, 400],
+  Салаты: [180, 320],
+  Горячее: [280, 450],
+  Суши: [200, 360],
+  Десерты: [90, 200],
+  Напитки: [200, 400],
+};
+
+function randomGrams(category: (typeof categoryNames)[number]) {
+  const [min, max] = gramsRangeByCategory[category];
+  return Math.round((min + Math.random() * (max - min)) / 10) * 10;
+}
+
 const products: SeedProduct[] = [
   // Супы (8)
   {
@@ -698,6 +712,7 @@ async function main() {
           name: product.name,
           description: product.description,
           price: product.price,
+          grams: randomGrams(product.category),
           calories: product.calories,
           proteins: product.proteins,
           fats: product.fats,

@@ -215,7 +215,7 @@ export function MenuCalendar() {
   }
 
   return (
-    <div className="grid gap-6 xl:grid-cols-[1.4fr_1fr]">
+    <div className="grid gap-6 lg:grid-cols-[minmax(0,1.5fr)_minmax(280px,1fr)]">
       <Card>
         <CardHeader className="flex flex-col gap-3 space-y-0 sm:flex-row sm:items-center sm:justify-between">
           <CardTitle className="capitalize">{monthTitle}</CardTitle>

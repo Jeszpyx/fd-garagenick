@@ -20,6 +20,7 @@ export function serializeProduct(product: {
   name: string;
   description?: string | null;
   price: { toString(): string } | number | string;
+  grams?: number | null;
   calories?: number | null;
   proteins?: { toString(): string } | number | string | null;
   fats?: { toString(): string } | number | string | null;
@@ -40,6 +41,7 @@ export function serializeProduct(product: {
     name: product.name,
     description: product.description ?? null,
     price: Number(product.price),
+    grams: Number(product.grams ?? 0),
     calories: Number(product.calories ?? 0),
     proteins: Number(product.proteins ?? 0),
     fats: Number(product.fats ?? 0),

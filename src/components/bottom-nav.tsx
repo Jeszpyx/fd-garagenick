@@ -17,8 +17,11 @@ export function BottomNav() {
   const totalItems = useCartItemCount();
 
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-border/50 bg-[color-mix(in_oklch,var(--background)_92%,transparent)] pb-[env(safe-area-inset-bottom)] backdrop-blur-xl md:hidden">
-      <div className="mx-auto grid max-w-lg grid-cols-3 px-2 py-1.5">
+    <nav
+      className="fixed inset-x-0 bottom-0 z-50 border-t border-border/50 bg-[oklch(0.94_0.025_145)]/95 pb-[env(safe-area-inset-bottom,0px)] backdrop-blur-xl md:hidden"
+      style={{ position: "fixed" }}
+    >
+      <div className="mx-auto grid h-14 max-w-lg grid-cols-3 px-2">
         {links.map(({ href, label, icon: Icon }) => {
           const active =
             href === "/" ? pathname === "/" : pathname.startsWith(href);
@@ -28,7 +31,7 @@ export function BottomNav() {
               key={href}
               href={href}
               className={cn(
-                "relative flex min-h-12 flex-col items-center justify-center gap-0.5 rounded-xl px-1 py-1.5 text-[11px] transition",
+                "relative flex h-full flex-col items-center justify-center gap-0.5 rounded-xl px-1 text-[11px] transition active:scale-[0.98]",
                 active
                   ? "bg-primary/12 text-primary"
                   : "text-muted-foreground hover:text-foreground",

@@ -50,6 +50,7 @@ export function parseProductForm(formData: FormData) {
     name: formData.get("name"),
     description: formData.get("description") || "",
     price: formData.get("price"),
+    grams: formData.get("grams") ?? 0,
     calories: formData.get("calories") ?? 0,
     proteins: formData.get("proteins") ?? 0,
     fats: formData.get("fats") ?? 0,

@@ -21,6 +21,7 @@ type FormState = {
   name: string;
   description: string;
   price: string;
+  grams: string;
   calories: string;
   proteins: string;
   fats: string;
@@ -33,6 +34,7 @@ const emptyForm: FormState = {
   name: "",
   description: "",
   price: "",
+  grams: "",
   calories: "",
   proteins: "",
   fats: "",
@@ -66,6 +68,7 @@ export function ProductForm({ editing, onSuccess, onCancel }: ProductFormProps) 
         name: editing.name,
         description: editing.description ?? "",
         price: String(editing.price),
+        grams: String(editing.grams ?? 0),
         calories: String(editing.calories ?? 0),
         proteins: String(editing.proteins ?? 0),
         fats: String(editing.fats ?? 0),
@@ -103,6 +106,7 @@ export function ProductForm({ editing, onSuccess, onCancel }: ProductFormProps) 
     payload.append("name", form.name);
     payload.append("description", form.description);
     payload.append("price", form.price);
+    payload.append("grams", form.grams);
     payload.append("calories", form.calories);
     payload.append("proteins", form.proteins);
     payload.append("fats", form.fats);
@@ -173,6 +177,20 @@ export function ProductForm({ editing, onSuccess, onCancel }: ProductFormProps) 
               value={form.price}
               onChange={(event) =>
                 setForm((prev) => ({ ...prev, price: event.target.value }))
+              }
+              required
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="grams">Граммовка порции, г</Label>
+            <Input
+              id="grams"
+              type="number"
+              min="1"
+              step="1"
+              value={form.grams}
+              onChange={(event) =>
+                setForm((prev) => ({ ...prev, grams: event.target.value }))
               }
               required
             />

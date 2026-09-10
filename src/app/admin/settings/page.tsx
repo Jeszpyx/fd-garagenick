@@ -157,7 +157,7 @@ export default function AdminSettingsPage() {
           <CardTitle>Получатели</CardTitle>
         </CardHeader>
         <CardContent>
-          <form className="space-y-5" onSubmit={handleSave}>
+          <form className="grid gap-5 lg:grid-cols-2" onSubmit={handleSave}>
             <div className="space-y-2">
               <Label htmlFor="emails">Email админов</Label>
               <Textarea
@@ -187,9 +187,11 @@ export default function AdminSettingsPage() {
               </p>
             </div>
 
-            <Button type="submit" disabled={saving}>
-              {saving ? "Сохранение..." : "Сохранить"}
-            </Button>
+            <div className="lg:col-span-2">
+              <Button type="submit" disabled={saving}>
+                {saving ? "Сохранение..." : "Сохранить"}
+              </Button>
+            </div>
           </form>
         </CardContent>
       </Card>

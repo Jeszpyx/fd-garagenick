@@ -25,6 +25,7 @@ export const productSchema = z.object({
   name: z.string().trim().min(2).max(120),
   description: z.string().trim().min(1).max(500),
   price: z.coerce.number().positive(),
+  grams: z.coerce.number().int().positive("Укажите граммовку порции"),
   calories: z.coerce.number().int().nonnegative(),
   proteins: z.coerce.number().nonnegative(),
   fats: z.coerce.number().nonnegative(),

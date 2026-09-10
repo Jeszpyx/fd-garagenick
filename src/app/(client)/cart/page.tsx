@@ -61,13 +61,18 @@ export default function CartPage() {
 
   if (items.length === 0) {
     return (
-      <div className="px-4 pt-6 sm:px-6">
-        <div className="site-surface mx-auto max-w-xl rounded-3xl p-6 text-center sm:p-10">
-          <h1 className="font-display text-2xl font-semibold">Корзина пуста</h1>
+      <div className="site-shell flex flex-1 items-center justify-center py-10 sm:py-16">
+        <div className="site-surface w-full max-w-xl rounded-3xl p-6 text-center sm:p-10">
+          <h1 className="font-display text-2xl font-semibold sm:text-3xl">
+            Корзина пуста
+          </h1>
           <p className="mt-2 text-muted-foreground">
             Добавьте дни меню — состав каждого дня задан на кухне.
           </p>
-          <Button className="mt-6 w-full sm:w-auto" onClick={() => router.push("/menu")}>
+          <Button
+            className="mt-6 w-full sm:w-auto"
+            onClick={() => router.push("/menu")}
+          >
             Перейти к меню
           </Button>
         </div>
@@ -76,14 +81,18 @@ export default function CartPage() {
   }
 
   return (
-    <div className="mx-auto grid max-w-5xl gap-6 px-4 pt-4 sm:px-6 sm:pt-6 lg:grid-cols-[1.4fr_0.8fr]">
-      <div className="space-y-4">
-        <h1 className="font-display text-3xl font-semibold tracking-tight">Корзина</h1>
+    <div className="site-shell grid gap-6 py-4 sm:py-6 lg:grid-cols-[minmax(0,1.5fr)_minmax(280px,0.7fr)] lg:gap-8 lg:py-8">
+      <div className="min-w-0 space-y-4">
+        <h1 className="font-display text-3xl font-semibold tracking-tight sm:text-4xl">
+          Корзина
+        </h1>
         {items.map((item) => (
           <Card key={item.date} className="overflow-hidden">
-            <CardContent className="flex flex-col gap-3 p-3 sm:flex-row sm:items-center sm:gap-4 sm:p-4">
+            <CardContent className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:gap-4 sm:p-5">
               <div className="min-w-0 flex-1">
-                <h3 className="font-semibold capitalize">{item.label}</h3>
+                <h3 className="font-semibold capitalize sm:text-lg">
+                  {item.label}
+                </h3>
                 <p className="mt-1 text-sm text-muted-foreground">
                   {item.productNames.join(", ")}
                 </p>
@@ -126,7 +135,7 @@ export default function CartPage() {
 
       <Card className="h-fit p-5 sm:p-6 lg:sticky lg:top-24">
         <h2 className="text-xl font-semibold">Итого</h2>
-        <p className="mt-4 text-3xl font-bold text-primary">
+        <p className="mt-4 font-display text-3xl font-bold text-primary sm:text-4xl">
           {formatPrice(totalPrice)}
         </p>
         <p className="mt-2 text-sm text-muted-foreground">
@@ -134,6 +143,7 @@ export default function CartPage() {
         </p>
         <Button
           className="mt-6 w-full"
+          size="lg"
           disabled={submitting}
           onClick={handleCheckout}
         >
@@ -141,7 +151,7 @@ export default function CartPage() {
         </Button>
         <Link
           href="/menu"
-          className="mt-3 block text-center text-sm text-primary"
+          className="mt-3 block text-center text-sm font-medium text-primary"
         >
           Выбрать другие дни
         </Link>

@@ -8,6 +8,7 @@ export type Product = {
   name: string;
   description: string | null;
   price: number;
+  grams: number;
   calories: number;
   proteins: number;
   fats: number;

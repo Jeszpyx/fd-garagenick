@@ -106,9 +106,9 @@ export default function LoginPageClient() {
 
   if (checkingSession) {
     return (
-      <div className="mx-auto max-w-md px-4 pt-6 sm:px-6">
-        <Card className="site-surface border-0 shadow-none">
-          <CardContent className="p-6 text-center text-sm text-muted-foreground">
+      <div className="site-shell flex min-h-[60dvh] items-center justify-center py-8 sm:py-12">
+        <Card className="site-surface w-full max-w-md border-0 shadow-none">
+          <CardContent className="p-6 text-center text-sm text-muted-foreground sm:p-8">
             Проверяем сохранённый вход…
           </CardContent>
         </Card>
@@ -117,15 +117,15 @@ export default function LoginPageClient() {
   }
 
   return (
-    <div className="mx-auto max-w-md px-4 pt-6 sm:px-6">
-      <Card className="site-surface border-0 shadow-none">
-        <CardHeader>
-          <CardTitle className="font-display text-2xl font-semibold">
+    <div className="site-shell flex min-h-[70dvh] items-center justify-center py-8 sm:py-12">
+      <Card className="site-surface w-full max-w-md border-0 shadow-none sm:max-w-lg">
+        <CardHeader className="px-5 pt-5 sm:px-8 sm:pt-8">
+          <CardTitle className="font-display text-2xl font-semibold sm:text-3xl">
             Вход по телефону РБ
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <p className="rounded-xl bg-muted/60 px-3 py-2 text-xs text-muted-foreground">
+        <CardContent className="space-y-4 px-5 pb-5 sm:px-8 sm:pb-8">
+          <p className="rounded-xl bg-muted/60 px-3 py-2 text-xs text-muted-foreground sm:text-sm">
             SMS пока заглушка: код всегда <strong>{MOCK_OTP_CODE}</strong>.
             После входа сессия хранится (access + refresh), повторный SMS не
             нужен.

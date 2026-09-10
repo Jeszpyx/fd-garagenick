@@ -16,7 +16,7 @@ export function DateTabs({
   onSelect,
 }: DateTabsProps) {
   return (
-    <div className="hide-scrollbar -mx-4 flex gap-2 overflow-x-auto px-4 pb-1 snap-x snap-mandatory sm:mx-0 sm:px-0">
+    <div className="hide-scrollbar -mx-1 flex gap-2 overflow-x-auto px-1 pb-1 snap-x snap-mandatory sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0">
       {dates.map((date) => {
         const selected = date === selectedDate;
         const weekday = formatDateLabel(date, { weekday: "short" });
@@ -29,7 +29,7 @@ export function DateTabs({
             type="button"
             onClick={() => onSelect(date)}
             className={cn(
-              "relative shrink-0 snap-start rounded-2xl px-3 py-2.5 text-left transition sm:px-4",
+              "relative shrink-0 snap-start rounded-2xl px-3 py-2.5 text-left transition sm:min-w-[5.5rem] sm:px-4",
               selected
                 ? "bg-primary text-primary-foreground"
                 : "site-surface text-secondary-foreground hover:bg-accent",

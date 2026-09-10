@@ -47,6 +47,7 @@ export async function PUT(request: NextRequest, context: RouteContext) {
         proteins: parsed.data.proteins,
         fats: parsed.data.fats,
         carbs: parsed.data.carbs,
+        grams: parsed.data.grams,
         categoryId,
         isActive: parsed.data.isActive ?? true,
         ...(image

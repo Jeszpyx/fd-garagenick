@@ -37,6 +37,7 @@ model Product {
   proteins      Decimal        @db.Decimal(8, 1) @default(0)
   fats          Decimal        @db.Decimal(8, 1) @default(0)
   carbs         Decimal        @db.Decimal(8, 1) @default(0)
+  grams         Int            @default(0)
   imageData     Bytes?
   imageMimeType String?
   categoryId    String?

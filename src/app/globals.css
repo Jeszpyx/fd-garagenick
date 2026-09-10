@@ -95,6 +95,7 @@ body {
     radial-gradient(ellipse 60% 40% at 95% 5%, oklch(0.88 0.05 95 / 0.45), transparent 50%),
     linear-gradient(180deg, oklch(0.95 0.02 145), oklch(0.92 0.03 150));
   background-attachment: fixed;
+  isolation: isolate;
   min-height: 100%;
 }
 
@@ -103,18 +104,38 @@ body {
   pointer-events: none;
   position: fixed;
   inset: 0;
-  z-index: 0;
+  z-index: -1;
   opacity: 0.035;
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
-.site-theme > * {
-  position: relative;
-  z-index: 1;
-}
-
 .font-display {
   font-family: var(--font-display), Georgia, serif;
+}
+
+/* Широкая адаптивная оболочка контента «на весь экран» */
+.site-shell {
+  width: 100%;
+  max-width: min(100%, 90rem);
+  margin-inline: auto;
+  padding-inline: clamp(1rem, 3vw, 3rem);
+}
+
+.site-page {
+  width: 100%;
+  min-height: calc(100dvh - 3.5rem - 3.5rem - env(safe-area-inset-bottom, 0px));
+}
+
+@media (min-width: 640px) {
+  .site-page {
+    min-height: calc(100dvh - 4rem - 3.5rem - env(safe-area-inset-bottom, 0px));
+  }
+}
+
+@media (min-width: 768px) {
+  .site-page {
+    min-height: calc(100dvh - 4rem);
+  }
 }
 
 .glass-panel {
@@ -163,7 +184,13 @@ body {
 }
 
 .site-hero-media {
-  animation: site-hero-zoom 8s ease-out forwards;
+  animation: site-hero-zoom 7s ease-out forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .site-hero-media {
+    animation: none;
+  }
 }
 
 .site-rise {
