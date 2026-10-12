@@ -5,34 +5,39 @@ import { useEffect, useState } from "react";
 import { ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-const SLIDES = [
-  {
-    src: "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=1800&q=80",
-    alt: "Готовые блюда на столе",
-  },
-  {
-    src: "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=1800&q=80",
-    alt: "Сервировка ресторанных блюд",
-  },
-  {
-    src: "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=1800&q=80",
-    alt: "Блюда с гриля",
-  },
-  {
-    src: "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?auto=format&fit=crop&w=1800&q=80",
-    alt: "Пицца из печи",
-  },
-  {
-    src: "https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?auto=format&fit=crop&w=1800&q=80",
-    alt: "Свежие суши",
-  },
+const SLIDE_IDS = [
+  "photo-1504674900247-0877df9cc836",
+  "photo-1414235077428-338989a2e8c0",
+  "photo-1555939594-58d7cb561ad1",
+  "photo-1565299624946-b28f40a0ae38",
+  "photo-1579584425555-c3ce17fd4351",
 ] as const;
+
+const SLIDE_ALTS = [
+  "Готовые блюда на столе",
+  "Сервировка ресторанных блюд",
+  "Блюда с гриля",
+  "Пицца из печи",
+  "Свежие суши",
+] as const;
+
+function unsplashSrc(id: string, width: number) {
+  return `https://images.unsplash.com/${id}?auto=format&fit=crop&w=${width}&q=80`;
+}
+
+const SLIDES = SLIDE_IDS.map((id, index) => ({
+  id,
+  src: unsplashSrc(id, 1800),
+  srcSet: `${unsplashSrc(id, 800)} 800w, ${unsplashSrc(id, 1200)} 1200w, ${unsplashSrc(id, 1800)} 1800w`,
+  alt: SLIDE_ALTS[index],
+}));
 
 const INTERVAL_MS = 7000;
 
 export function HomeHero() {
   const [active, setActive] = useState(0);
   const [paused, setPaused] = useState(false);
+  const [loaded, setLoaded] = useState(() => new Set([0]));
 
   useEffect(() => {
     if (paused) return;
@@ -47,6 +52,17 @@ export function HomeHero() {
     return () => window.clearInterval(timer);
   }, [paused]);
 
+  useEffect(() => {
+    const next = (active + 1) % SLIDES.length;
+    setLoaded((prev) => {
+      if (prev.has(active) && prev.has(next)) return prev;
+      const nextSet = new Set(prev);
+      nextSet.add(active);
+      nextSet.add(next);
+      return nextSet;
+    });
+  }, [active]);
+
   return (
     <section
       className="w-full"
@@ -54,19 +70,26 @@ export function HomeHero() {
       onMouseLeave={() => setPaused(false)}
     >
       <div className="relative isolate min-h-[min(48dvh,420px)] w-full overflow-hidden sm:min-h-[min(52dvh,480px)] lg:min-h-[min(56dvh,560px)]">
-        {SLIDES.map((slide, index) => (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            key={slide.src}
-            src={slide.src}
-            alt={slide.alt}
-            className={cn(
-              "absolute inset-0 h-full w-full object-cover transition-opacity duration-1000 ease-out",
-              index === active ? "site-hero-media opacity-100" : "opacity-0",
-            )}
-            aria-hidden={index !== active}
-          />
-        ))}
+        {SLIDES.map((slide, index) =>
+          loaded.has(index) ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              key={slide.id}
+              src={slide.src}
+              srcSet={slide.srcSet}
+              sizes="100vw"
+              alt={slide.alt}
+              fetchPriority={index === 0 ? "high" : "low"}
+              decoding={index === 0 ? "sync" : "async"}
+              loading={index === 0 ? "eager" : "lazy"}
+              className={cn(
+                "absolute inset-0 h-full w-full object-cover transition-opacity duration-1000 ease-out",
+                index === active ? "site-hero-media opacity-100" : "opacity-0",
+              )}
+              aria-hidden={index !== active}
+            />
+          ) : null,
+        )}
 
         <div className="absolute inset-0 bg-gradient-to-r from-[oklch(0.22_0.05_155/0.88)] via-[oklch(0.25_0.04_150/0.55)] to-[oklch(0.3_0.03_145/0.25)]" />
         <div className="absolute inset-0 bg-gradient-to-t from-[oklch(0.18_0.04_150/0.75)] via-transparent to-[oklch(0.2_0.03_150/0.35)]" />
@@ -97,12 +120,20 @@ export function HomeHero() {
             >
               {SLIDES.map((slide, index) => (
                 <button
-                  key={slide.src}
+                  key={slide.id}
                   type="button"
                   role="tab"
                   aria-selected={index === active}
                   aria-label={`Слайд ${index + 1}`}
-                  onClick={() => setActive(index)}
+                  onClick={() => {
+                    setLoaded((prev) => {
+                      if (prev.has(index)) return prev;
+                      const nextSet = new Set(prev);
+                      nextSet.add(index);
+                      return nextSet;
+                    });
+                    setActive(index);
+                  }}
                   className={cn(
                     "h-2 rounded-full transition-all",
                     index === active

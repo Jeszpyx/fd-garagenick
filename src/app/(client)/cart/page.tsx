@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { Minus, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { ensureUserSession } from "@/lib/api/user-client";
-import { useCartStore } from "@/store/cart";
+import { useCartStore, useCartTotalPrice } from "@/store/cart";
 import { formatPrice } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -17,7 +17,7 @@ export default function CartPage() {
   const updateQuantity = useCartStore((state) => state.updateQuantity);
   const removeItem = useCartStore((state) => state.removeItem);
   const clearCart = useCartStore((state) => state.clearCart);
-  const totalPrice = useCartStore((state) => state.totalPrice());
+  const totalPrice = useCartTotalPrice();
   const [submitting, setSubmitting] = useState(false);
 
   async function handleCheckout() {

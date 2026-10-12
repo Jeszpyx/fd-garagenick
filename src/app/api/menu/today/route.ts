@@ -7,7 +7,12 @@ export async function GET() {
     const date = todayDateKey();
     const items = await getMenuForToday();
 
-    return apiSuccess({ date, items });
+    const response = apiSuccess({ date, items });
+    response.headers.set(
+      "Cache-Control",
+      "public, s-maxage=30, stale-while-revalidate=60",
+    );
+    return response;
   } catch (error) {
     console.error("GET /api/menu/today", error);
     return apiError("Не удалось загрузить меню на сегодня", 500);

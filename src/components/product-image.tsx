@@ -7,6 +7,7 @@ type ProductImageProps = {
   alt: string;
   className?: string;
   sizes?: string;
+  priority?: boolean;
 };
 
 export function ProductImage({
@@ -14,6 +15,7 @@ export function ProductImage({
   alt,
   className = "object-cover",
   sizes,
+  priority = false,
 }: ProductImageProps) {
   if (!src) {
     return (
@@ -29,6 +31,8 @@ export function ProductImage({
       alt={alt}
       fill
       unoptimized
+      priority={priority}
+      decoding="async"
       className={className}
       sizes={sizes}
     />

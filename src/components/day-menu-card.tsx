@@ -12,9 +12,14 @@ type DayMenuCardProps = {
   date: string;
   products: Product[];
   index?: number;
+  priorityImage?: boolean;
 };
 
-export function DayMenuCard({ date, products }: DayMenuCardProps) {
+export function DayMenuCard({
+  date,
+  products,
+  priorityImage = false,
+}: DayMenuCardProps) {
   const addDay = useCartStore((state) => state.addDay);
   const dayPrice = products.reduce((sum, product) => sum + product.price, 0);
   const productNames = products.map((product) => product.name);
@@ -38,6 +43,7 @@ export function DayMenuCard({ date, products }: DayMenuCardProps) {
           alt={`Меню на ${formatDateLabel(date)}`}
           className="object-cover transition duration-700 hover:scale-[1.03]"
           sizes="(min-width: 768px) 50vw, 100vw"
+          priority={priorityImage}
         />
         <div className="absolute inset-0 bg-gradient-to-t from-[oklch(0.2_0.04_150/0.82)] via-[oklch(0.25_0.03_150/0.2)] to-transparent" />
         <div className="absolute bottom-4 left-4 right-4 flex items-end justify-between gap-3 text-white sm:bottom-5 sm:left-5 sm:right-5">

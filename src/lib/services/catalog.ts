@@ -102,6 +102,43 @@ export async function getMenuForDate(dateKey: string) {
   return items.map(serializeMenuItem);
 }
 
+/** One DB round-trip for several dates (e.g. checkout cart days). */
+export async function getMenuGroupedByDates(dateKeys: string[]) {
+  const uniqueKeys = [...new Set(dateKeys)].filter(Boolean);
+  const grouped = new Map<string, ReturnType<typeof serializeMenuItem>[]>();
+
+  for (const key of uniqueKeys) {
+    grouped.set(key, []);
+  }
+
+  if (uniqueKeys.length === 0) {
+    return grouped;
+  }
+
+  const items = await prisma.menuSchedule.findMany({
+    where: {
+      date: { in: uniqueKeys.map(dateKeyToUtcDate) },
+      product: { isActive: true },
+    },
+    include: {
+      product: productQuery,
+    },
+    orderBy: [{ date: "asc" }, { createdAt: "asc" }],
+  });
+
+  for (const item of items) {
+    const serialized = serializeMenuItem(item);
+    const bucket = grouped.get(serialized.date);
+    if (bucket) {
+      bucket.push(serialized);
+    } else {
+      grouped.set(serialized.date, [serialized]);
+    }
+  }
+
+  return grouped;
+}
+
 export async function getMenuForToday() {
   return getMenuForDate(todayDateKey());
 }

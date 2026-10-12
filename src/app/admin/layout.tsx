@@ -3,7 +3,14 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { CalendarDays, LayoutGrid, LogOut, Settings, Tags } from "lucide-react";
+import {
+  CalendarDays,
+  Info,
+  LayoutGrid,
+  LogOut,
+  Settings,
+  Tags,
+} from "lucide-react";
 import { clearAdminToken, getAdminToken } from "@/lib/api/admin-client";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -12,9 +19,9 @@ const links = [
   { href: "/admin/products", label: "Товары", icon: LayoutGrid },
   { href: "/admin/categories", label: "Категории", icon: Tags },
   { href: "/admin/menu", label: "Календарь", icon: CalendarDays },
+  { href: "/admin/about", label: "О нас", icon: Info },
   { href: "/admin/settings", label: "Настройки", icon: Settings },
 ];
-
 export default function AdminLayout({
   children,
 }: {

@@ -86,6 +86,72 @@ export const notificationSettingsSchema = z.object({
     .max(50),
 });
 
+const optionalText = (max: number) =>
+  z
+    .string()
+    .trim()
+    .max(max)
+    .optional()
+    .transform((value) => value ?? "");
+
+const optionalEmail = z
+  .string()
+  .trim()
+  .max(120)
+  .optional()
+  .transform((value) => value ?? "")
+  .refine(
+    (value) => value === "" || z.string().email().safeParse(value).success,
+    "Некорректный email",
+  );
+
+const optionalUrl = z
+  .string()
+  .trim()
+  .max(500)
+  .optional()
+  .transform((value) => value ?? "")
+  .refine(
+    (value) =>
+      value === "" ||
+      z.string().url().safeParse(value).success ||
+      value.startsWith("/"),
+    "Укажите корректную ссылку",
+  );
+
+export const aboutInfoSchema = z.object({
+  title: optionalText(120),
+  tagline: optionalText(200),
+  shortDescription: optionalText(500),
+  fullDescription: optionalText(5000),
+  address: optionalText(300),
+  addressNote: optionalText(300),
+  city: optionalText(120),
+  postalCode: optionalText(20),
+  phone: optionalText(40),
+  phoneSecondary: optionalText(40),
+  email: optionalEmail,
+  whatsapp: optionalText(40),
+  telegram: optionalText(120),
+  instagram: optionalText(120),
+  vkontakte: optionalText(120),
+  hoursWeekdays: optionalText(200),
+  hoursWeekend: optionalText(200),
+  hoursNote: optionalText(500),
+  deliveryInfo: optionalText(2000),
+  deliveryZones: optionalText(2000),
+  minOrderNote: optionalText(500),
+  paymentMethods: optionalText(500),
+  parkingInfo: optionalText(1000),
+  howToFind: optionalText(2000),
+  mapUrl: optionalUrl,
+  legalName: optionalText(200),
+  unp: optionalText(40),
+  foundedYear: optionalText(10),
+  capacity: optionalText(40),
+  amenities: optionalText(2000),
+});
+
 export type ProductInput = z.infer<typeof productSchema>;
 export type CategoryInput = z.infer<typeof categorySchema>;
 export type MenuScheduleInput = z.infer<typeof menuScheduleSchema>;
@@ -93,3 +159,4 @@ export type CreateOrderInput = z.infer<typeof createOrderSchema>;
 export type NotificationSettingsInput = z.infer<
   typeof notificationSettingsSchema
 >;
+export type AboutInfoInput = z.infer<typeof aboutInfoSchema>;

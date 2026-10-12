@@ -3,7 +3,8 @@ import { requireUserSession } from "@/lib/auth/user-session";
 import { prisma } from "@/lib/prisma";
 import { apiError, apiSuccess } from "@/lib/api/response";
 import { createOrderSchema } from "@/lib/validations";
-import { getMenuForDate, serializeProduct } from "@/lib/services/catalog";
+import { getMenuGroupedByDates } from "@/lib/services/catalog";
+import { productImageUrl } from "@/lib/product-image";
 import { notifyAdminsAboutOrder } from "@/lib/services/notify";
 
 export async function POST(request: NextRequest) {
@@ -24,6 +25,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const menuByDate = await getMenuGroupedByDates([...dayQuantities.keys()]);
+
     const productTotals = new Map<
       string,
       { quantity: number; price: number; name: string }
@@ -36,7 +39,7 @@ export async function POST(request: NextRequest) {
     let total = 0;
 
     for (const [date, dayQty] of dayQuantities) {
-      const menuItems = await getMenuForDate(date);
+      const menuItems = menuByDate.get(date) ?? [];
       if (menuItems.length === 0) {
         return apiError(`На ${date} меню не назначено`, 400);
       }
@@ -88,7 +91,12 @@ export async function POST(request: NextRequest) {
         items: {
           include: {
             product: {
-              omit: { imageData: true },
+              select: {
+                id: true,
+                name: true,
+                imageMimeType: true,
+                updatedAt: true,
+              },
             },
           },
         },
@@ -123,7 +131,9 @@ export async function POST(request: NextRequest) {
           product: {
             id: item.product.id,
             name: item.product.name,
-            imageUrl: serializeProduct(item.product).imageUrl,
+            imageUrl: item.product.imageMimeType
+              ? productImageUrl(item.product.id, item.product.updatedAt)
+              : null,
           },
         })),
       },

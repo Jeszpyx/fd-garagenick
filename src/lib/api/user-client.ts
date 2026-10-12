@@ -15,12 +15,8 @@ export async function ensureUserSession(): Promise<boolean> {
     credentials: "include",
   });
 
-  if (!refreshed.ok) {
-    return false;
-  }
-
-  const again = await fetch("/api/auth/me", { credentials: "include" });
-  return again.ok;
+  // Refresh already validates the session — no second /me round-trip.
+  return refreshed.ok;
 }
 
 export async function logoutUser() {

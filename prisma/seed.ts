@@ -22,12 +22,14 @@ function getDatabaseUrl() {
     return fromArg;
   }
 
-  if (process.env.SEED_DATABASE_URL) {
-    return process.env.SEED_DATABASE_URL;
+  const fromEnv = process.env.SEED_DATABASE_URL || process.env.DATABASE_URL;
+  if (fromEnv) {
+    return fromEnv;
   }
 
-  // Тестовая Prisma Postgres — дефолт для локального сида
-  return "postgres://08b47e0c7b4d45a730f9e927761e01eb75ea39c215f192ae8cf140cc8f84a69b:sk_uOLimeLICbrNumSX4BK8M@pooled.db.prisma.io:5432/postgres?sslmode=require";
+  throw new Error(
+    "Не задан URL базы: укажите DATABASE_URL / SEED_DATABASE_URL в .env или передайте --url",
+  );
 }
 
 const databaseUrl = getDatabaseUrl();

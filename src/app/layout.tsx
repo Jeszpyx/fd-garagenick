@@ -1,26 +1,24 @@
 import type { Metadata, Viewport } from "next";
-import { Geist, Geist_Mono, Manrope, Source_Serif_4 } from "next/font/google";
+import { Geist, Manrope, Source_Serif_4 } from "next/font/google";
 import { Toaster } from "sonner";
 import "./globals.css";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+  display: "swap",
 });
 
 const sourceSerif = Source_Serif_4({
   variable: "--font-source-serif",
   subsets: ["latin", "cyrillic"],
+  display: "swap",
 });
 
 const manrope = Manrope({
   variable: "--font-manrope",
   subsets: ["latin", "cyrillic"],
+  display: "swap",
 });
 
 export const viewport: Viewport = {
@@ -52,7 +50,7 @@ export default function RootLayout({
   return (
     <html
       lang="ru"
-      className={`${geistSans.variable} ${geistMono.variable} ${sourceSerif.variable} ${manrope.variable} h-full antialiased`}
+      className={`${geistSans.variable} ${sourceSerif.variable} ${manrope.variable} h-full antialiased`}
     >
       <body className="min-h-full min-w-0 flex flex-col overflow-x-clip">
         {children}

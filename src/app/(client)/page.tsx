@@ -1,14 +1,22 @@
 import Link from "next/link";
+import { unstable_cache } from "next/cache";
 import { DayMenuCard } from "@/components/day-menu-card";
 import { HomeHero } from "@/components/home-hero";
-import { getMenuForToday } from "@/lib/services/catalog";
+import { getMenuForDate } from "@/lib/services/catalog";
 import { formatDateLabel, todayDateKey } from "@/lib/utils";
 
+/** Always resolve "today" correctly; cache only the menu query per date. */
 export const dynamic = "force-dynamic";
+
+const getCachedMenuForDate = unstable_cache(
+  async (dateKey: string) => getMenuForDate(dateKey),
+  ["menu-for-date"],
+  { revalidate: 60 },
+);
 
 export default async function HomePage() {
   const date = todayDateKey();
-  const menu = await getMenuForToday();
+  const menu = await getCachedMenuForDate(date);
   const products = menu.map((item) => item.product);
 
   return (
@@ -38,7 +46,7 @@ export default async function HomePage() {
             На сегодня меню ещё не назначено.
           </div>
         ) : (
-          <DayMenuCard date={date} products={products} />
+          <DayMenuCard date={date} products={products} priorityImage />
         )}
       </section>
     </div>

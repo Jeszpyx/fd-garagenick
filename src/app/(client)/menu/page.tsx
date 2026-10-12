@@ -13,36 +13,46 @@ export default function MenuPage() {
     [today],
   );
   const [selectedDate, setSelectedDate] = useState(today);
-  const [items, setItems] = useState<MenuItem[]>([]);
-  const [datesWithMenu, setDatesWithMenu] = useState<Set<string>>(new Set());
+  const [rangeItems, setRangeItems] = useState<MenuItem[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let cancelled = false;
+
     async function loadRange() {
-      const from = dates[0];
-      const to = dates[dates.length - 1];
-      const response = await fetch(`/api/menu?from=${from}&to=${to}`);
-      const json = await response.json();
-      const rangeItems = (json.data?.items ?? []) as MenuItem[];
-      setDatesWithMenu(new Set(rangeItems.map((item) => item.date)));
+      setLoading(true);
+      try {
+        const from = dates[0];
+        const to = dates[dates.length - 1];
+        const response = await fetch(`/api/menu?from=${from}&to=${to}`);
+        const json = await response.json();
+        if (cancelled) return;
+        setRangeItems((json.data?.items ?? []) as MenuItem[]);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
     }
 
     void loadRange();
+    return () => {
+      cancelled = true;
+    };
   }, [dates]);
 
-  useEffect(() => {
-    async function loadMenu() {
-      setLoading(true);
-      const response = await fetch(`/api/menu?date=${selectedDate}`);
-      const json = await response.json();
-      setItems(json.data?.items ?? []);
-      setLoading(false);
-    }
+  const datesWithMenu = useMemo(
+    () => new Set(rangeItems.map((item) => item.date)),
+    [rangeItems],
+  );
 
-    void loadMenu();
-  }, [selectedDate]);
+  const items = useMemo(
+    () => rangeItems.filter((item) => item.date === selectedDate),
+    [rangeItems, selectedDate],
+  );
 
-  const products = items.map((item) => item.product);
+  const products = useMemo(
+    () => items.map((item) => item.product),
+    [items],
+  );
 
   return (
     <div className="site-shell space-y-6 py-4 sm:py-6 lg:py-8">

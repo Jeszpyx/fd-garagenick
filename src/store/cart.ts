@@ -95,7 +95,15 @@ export const useCartStore = create<CartState>()(
 );
 
 export function useCartItemCount() {
-  const hasHydrated = useCartStore((state) => state.hasHydrated);
-  const totalItems = useCartStore((state) => state.totalItems());
-  return hasHydrated ? totalItems : 0;
+  return useCartStore((state) =>
+    state.hasHydrated
+      ? state.items.reduce((sum, item) => sum + item.quantity, 0)
+      : 0,
+  );
+}
+
+export function useCartTotalPrice() {
+  return useCartStore((state) =>
+    state.items.reduce((sum, item) => sum + item.price * item.quantity, 0),
+  );
 }
