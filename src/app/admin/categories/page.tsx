@@ -3,7 +3,11 @@
 import { useEffect, useState } from "react";
 import { Trash2 } from "lucide-react";
 import { toast } from "sonner";
-import { adminFetch, clearAdminToken } from "@/lib/api/admin-client";
+import {
+  adminFetch,
+  clearAdminToken,
+  type AdminFetchResult,
+} from "@/lib/api/admin-client";
 import type { Category } from "@/types";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -18,8 +22,11 @@ export default function AdminCategoriesPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
-  async function loadCategories() {
-    const result = await adminFetch<Category[]>("/api/admin/categories");
+  function fetchCategories() {
+    return adminFetch<Category[]>("/api/admin/categories");
+  }
+
+  function applyCategories(result: AdminFetchResult<Category[]>) {
     if (result.status === 401 || result.error === "Unauthorized") {
       clearAdminToken();
       router.replace("/admin/login");
@@ -33,8 +40,13 @@ export default function AdminCategoriesPage() {
     setLoading(false);
   }
 
+  async function loadCategories() {
+    applyCategories(await fetchCategories());
+  }
+
   useEffect(() => {
-    void loadCategories();
+    void fetchCategories().then(applyCategories);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   async function handleCreate(event: React.FormEvent) {

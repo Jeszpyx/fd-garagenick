@@ -3,7 +3,11 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { adminFetch, clearAdminToken } from "@/lib/api/admin-client";
+import {
+  adminFetch,
+  clearAdminToken,
+  type AdminFetchResult,
+} from "@/lib/api/admin-client";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -41,8 +45,11 @@ export default function AdminSettingsPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
-  async function loadSettings() {
-    const result = await adminFetch<SettingsResponse>("/api/admin/settings");
+  function fetchSettings() {
+    return adminFetch<SettingsResponse>("/api/admin/settings");
+  }
+
+  function applySettings(result: AdminFetchResult<SettingsResponse>) {
     if (result.status === 401 || result.error === "Unauthorized") {
       clearAdminToken();
       router.replace("/admin/login");
@@ -66,7 +73,8 @@ export default function AdminSettingsPage() {
   }
 
   useEffect(() => {
-    void loadSettings();
+    void fetchSettings().then(applySettings);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   async function handleSave(event: React.FormEvent) {
